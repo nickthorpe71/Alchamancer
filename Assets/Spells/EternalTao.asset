@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 589bb638c8a4c4d59aec0808afb5c2be, type: 3}
+  m_Name: EternalTao
+  m_EditorClassIdentifier: 
+  spellName: Eternal Tao
+  color: Yellow
+  category: Status
+  power: 0
+  techType: Heal
+  castSound: {fileID: 8300000, guid: 91cda283c25950647abaa6957bf147b0, type: 3}
+  poisionChance: 0
+  burnChance: 0
+  removeDot: 0
+  changeLandscape: 
+  healAmount: 25
+  myAttkInt: 0
+  theirAttkInt: 0
+  myDefInt: 10
+  theirDefInt: 0
+  stealHealth: 0
+  counter: 0
+  spiritWalk: 0
+  eatMana: 0
+  blueCost: 0
+  greenCost: 0
+  redCost: 0
+  yellowCost: 1
+  whiteCost: 1
+  blackCost: 0
+  totalcost: 2
+  toolTip: Simplicity, patience, compassion. Heals the user and raises defense.
+  hasProjectile: 0
+  hasTheirLocationEffect: 0
+  hasMyLocationEffect: 1
+  projectile: 
+  theirLocationEffect: 
+  myLocationEffect: EternalTao
+  screenShake: 1

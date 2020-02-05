@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 589bb638c8a4c4d59aec0808afb5c2be, type: 3}
+  m_Name: PlanetSplitter
+  m_EditorClassIdentifier: 
+  spellName: Planet Splitter
+  color: Red
+  category: Attack
+  power: 115
+  techType: DoT
+  castSound: {fileID: 8300000, guid: 2c00f81e881a8fe4da1a6a0b3d2285eb, type: 3}
+  poisionChance: 0
+  burnChance: 100
+  removeDot: 0
+  changeLandscape: 
+  healAmount: 0
+  myAttkInt: 0
+  theirAttkInt: 0
+  myDefInt: 0
+  theirDefInt: 0
+  stealHealth: 0
+  counter: 0
+  spiritWalk: 0
+  eatMana: 0
+  blueCost: 0
+  greenCost: 0
+  redCost: 1
+  yellowCost: 1
+  whiteCost: 1
+  blackCost: 0
+  totalcost: 3
+  toolTip: Call down a meteor that does devistating damage. Will burn opponent.
+  hasProjectile: 1
+  hasTheirLocationEffect: 0
+  hasMyLocationEffect: 0
+  projectile: PlanetSplitter
+  theirLocationEffect: 
+  myLocationEffect: 
+  screenShake: 1

@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Rock
+  - Water
+  - Plant
+  - Fire
+  - Dirt
+  - Empty
+  - MsgTxt
+  - LevelNameTxt
+  - QuestTxt
+  - TransTxt
+  - PointsTxt
+  - Goal
+  - DragonVein
+  - Give
+  - Take
+  - Crystal
+  - Gold
+  - Death
+  - Life
+  - Canvas
+  - WinScreen
+  - Leaderboards
+  - FxTemporaire
+  - UpButton
+  - DownButton
+  - LeftButton
+  - RightButton
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: BackSprite
+    uniqueID: 3215500791
+    locked: 0
+  - name: Background
+    uniqueID: 316740513
+    locked: 0
+  - name: Midground
+    uniqueID: 1286517117
+    locked: 0
+  - name: PostMid
+    uniqueID: 2048141409
+    locked: 0
+  - name: Water
+    uniqueID: 1214963829
+    locked: 0
+  - name: Plant
+    uniqueID: 2321823403
+    locked: 0
+  - name: Fire
+    uniqueID: 3912300153
+    locked: 0
+  - name: Rock
+    uniqueID: 1679518011
+    locked: 0
+  - name: Metal
+    uniqueID: 4171413879
+    locked: 0
+  - name: Item
+    uniqueID: 1699164035
+    locked: 0
+  - name: Character
+    uniqueID: 4051215963
+    locked: 0
+  - name: SubForeGround1
+    uniqueID: 3238941141
+    locked: 0
+  - name: SubForeGround2
+    uniqueID: 3833784547
+    locked: 0
+  - name: Foreground
+    uniqueID: 771897465
+    locked: 0

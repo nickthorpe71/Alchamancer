@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 589bb638c8a4c4d59aec0808afb5c2be, type: 3}
+  m_Name: SpiritWalk
+  m_EditorClassIdentifier: 
+  spellName: Spirit Walk
+  color: White
+  category: Status
+  power: 0
+  techType: Spirit Walk
+  castSound: {fileID: 8300000, guid: 74cf572080bc443abb9e110c1f2ee8e9, type: 3}
+  poisionChance: 0
+  burnChance: 0
+  removeDot: 0
+  changeLandscape: 
+  healAmount: 10
+  myAttkInt: 0
+  theirAttkInt: 0
+  myDefInt: 0
+  theirDefInt: 0
+  stealHealth: 0
+  counter: 0
+  spiritWalk: 1
+  eatMana: 0
+  blueCost: 0
+  greenCost: 0
+  redCost: 0
+  yellowCost: 0
+  whiteCost: 1
+  blackCost: 1
+  totalcost: 2
+  toolTip: Make your body ethereal allowing you to walk over mana.
+  hasProjectile: 0
+  hasTheirLocationEffect: 0
+  hasMyLocationEffect: 1
+  projectile: 
+  theirLocationEffect: 
+  myLocationEffect: SpiritWalk
+  screenShake: 0

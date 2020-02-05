@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 589bb638c8a4c4d59aec0808afb5c2be, type: 3}
+  m_Name: HarvestSoul
+  m_EditorClassIdentifier: 
+  spellName: Harvest Soul
+  color: Black
+  category: Attack
+  power: 60
+  techType: Steal Health
+  castSound: {fileID: 8300000, guid: 15de3a2761f2f4ba49a19c703461b1e0, type: 3}
+  poisionChance: 0
+  burnChance: 0
+  removeDot: 0
+  changeLandscape: 
+  healAmount: 0
+  myAttkInt: 0
+  theirAttkInt: 0
+  myDefInt: 0
+  theirDefInt: 0
+  stealHealth: 1
+  counter: 0
+  spiritWalk: 0
+  eatMana: 0
+  blueCost: 0
+  greenCost: 0
+  redCost: 0
+  yellowCost: 1
+  whiteCost: 1
+  blackCost: 1
+  totalcost: 3
+  toolTip: The opponent's soul is ripped form their body stealing health and giving
+    it to the user.
+  hasProjectile: 1
+  hasTheirLocationEffect: 0
+  hasMyLocationEffect: 0
+  projectile: HarvestSoul
+  theirLocationEffect: 
+  myLocationEffect: 
+  screenShake: 0

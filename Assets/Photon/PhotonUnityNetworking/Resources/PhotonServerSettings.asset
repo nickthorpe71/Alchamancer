@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3758f8f58fdef43803eb9be1df0608, type: 3}
+  m_Name: PhotonServerSettings
+  m_EditorClassIdentifier: 
+  AppSettings:
+    AppIdRealtime: 30af925b-072e-4c80-98d6-d0666280ce74
+    AppIdChat: 
+    AppIdVoice: 
+    AppVersion: 0
+    UseNameServer: 1
+    FixedRegion: 
+    Server: 
+    Port: 0
+    Protocol: 0
+    EnableLobbyStatistics: 0
+    NetworkLogging: 1
+  StartInOfflineMode: 0
+  PunLogging: 0
+  EnableSupportLogger: 0
+  RunInBackground: 1
+  RpcList:
+  - DestroySpaceship
+  - Fire
+  - RespawnSpaceship
+  - RPC_CameraShake
+  - RPC_ChangeAreaElement
+  - RPC_ChangeReadyState
+  - RPC_MyHealth
+  - RPC_OtherReplace
+  - RPC_PlayerJoined
+  - RPC_TheirHealth
+  - RPC_ThemToMe
+  - RPC_TurnFalse
+  - RPC_TurnTrue
+  - RPC_DisplayPublicMessage
+  - RPC_TheirLocationEffect
+  - RPC_MyLocationEffect
+  - RPC_MyStat
+  - RPC_TheirStat
+  - RPC_DoT
+  - RPC_Burn
+  - RPC_Poison
+  - RPC_Antidote
+  - TheirHealth
+  - MyHealth
+  - RPC_IncreasePlayers
+  - RPC_SetNamesAndLevels
+  - RPC_WinRoutine
+  - RPC_Cycle
+  - RandomizeColors
+  - RPC_RandomizeColors
+  - RPC_Counter
+  - RPC_MyCounter
+  - RPC_TheirCounter
+  - PlaySinglePublic
+  - RPC_PlaySinglePublic
+  - OtherCastAnim
+  - SpawnTakeCastOther
+  - RPC_LoseRoutine
+  - RPC_TransferPlayerSkin
+  - RPC_SendLevelString
+  - RPC_SpiritWalk
+  - RPC_FillByCode
+  DisableAutoOpenWizard: 1
+  ShowSettings: 1
