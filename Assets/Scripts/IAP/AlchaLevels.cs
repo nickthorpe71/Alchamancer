@@ -32,7 +32,44 @@ public class AlchaLevels : MonoBehaviour
     {
         database = Database.instance;
 
-        SetInfo(database.rows);
+        StartSetInfo();
+    }
+
+    public void StartSetInfo()
+    {
+        StartCoroutine(SetInfoRoutine());
+    }
+
+    public IEnumerator SetInfoRoutine()
+    {
+        WWW www = new WWW(database.webURL + database.privateCode + "/pipe-get/" + WWW.EscapeURL("Alchamancer"));
+        yield return www;
+
+        if (string.IsNullOrEmpty(www.error))
+        {
+            SetInfo(www.text);
+        }
+        else
+            print("Error pulling Alchamancer info " + www.error);
+    }
+
+    public void SetInfo(string textStream)
+    {
+        string[] entryInfo = textStream.Split(new char[] { '|' });
+
+        string username = entryInfo[0];
+        int rp = int.Parse(entryInfo[1]);
+        int extra = int.Parse(entryInfo[2]);
+        string ID = entryInfo[3];
+
+        Row row = new Row(username, rp, extra, ID);
+
+        currentLevel = row.rp;
+        currentExp = row.extra;
+        levelText.text = currentLevel.ToString();
+        currentDonations = float.Parse(row.ID);
+        donationText.text = "$" + row.ID;
+
         expToNextLevel = ExpMod(currentLevel);
         startLevel = currentLevel;
         startExp = currentExp;
@@ -40,6 +77,12 @@ public class AlchaLevels : MonoBehaviour
         expBar.fill.fillAmount = expBar.Map(currentExp, expToNextLevel);
         expBar.MaxValue = expToNextLevel;
         expBar.SetValue(currentExp);
+
+        if (loading.activeSelf)
+        {
+            addButtons.SetActive(true);
+            loading.SetActive(false);
+        }
     }
 
     int ExpMod(int level)
@@ -105,27 +148,6 @@ public class AlchaLevels : MonoBehaviour
         database.SendAlchamancer(this);
     }
 
-    public void SetInfo(Row[] rows)
-    {
-        for (int i = 0; i < rows.Length; i++)
-        {
-            if (rows[i].username == "Alchamancer")
-            {
-                currentLevel = rows[i].rp;
-                currentExp = rows[i].extra;
-                levelText.text = currentLevel.ToString();
-                currentDonations = float.Parse(rows[i].ID);
-                donationText.text = "$" + rows[i].ID;
-
-                if (loading.activeSelf)
-                {
-                    addButtons.SetActive(true);
-                    loading.SetActive(false);
-                }
-            }
-        }
-    }
-
     public IEnumerator LevelUp(int levelsToGain)
     {
         int tempLevel = startLevel;
@@ -155,21 +177,13 @@ public class AlchaLevels : MonoBehaviour
         currentExp = finalExp;
     }
 
-    public void UpdateLeaderboards()
-    {
-        //change this to work for mother
-        //Database.AddNewRow(saveLoad.playerName, saveLoad.playerLevel, 0, SystemInfo.deviceUniqueIdentifier);
-    }
-
     public void LeaveEarly()
     {
-        UpdateLeaderboards();
         SceneSelect.instance.MainMenuButton();
     }
 
     public void LeaveEarlyToLeaderboards()
     {
-        UpdateLeaderboards();
         SceneSelect.instance.LeaderBoard();
     }
 

@@ -22,7 +22,6 @@ public class DonateScreen : MonoBehaviour
 
     private string message0 = "Hello, my name is Nick and I'm a solo independant developer. I decided to create a place where players can donate.";
     private string message1 = "You can buy exp which will be added to Alchamancer's exp bar. When Alchamancer gains a level I will add a new feature such as a new character skin or game mode.";
-    //private string message1 = "I'm a solo independant developer so I decided to create a place where players can show their support in the form of a $$$ donation. You can buy experience which will be added to Alchamancer's exp bar.";
     private string message2 = "Essentially, instead of traditional monetization, this game will grow by the contribution of the people who play it and it will grow for everyone equally. \nThanks again for playing!";
     private string[] messages = { "", "", "" };
 

@@ -262,6 +262,9 @@ public class SpellCasterOffline : MonoBehaviour
 
             float damagePreRounding = ((22 * power * attack / defense/ 50)) * modifier;
 
+            if (spell.category == "Attack")
+                damagePreRounding++;
+
             int damage = Mathf.RoundToInt(damagePreRounding);
 
             if (spell.eatMana)

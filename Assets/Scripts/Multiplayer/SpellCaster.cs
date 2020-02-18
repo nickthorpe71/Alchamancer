@@ -41,19 +41,23 @@ public class SpellCaster : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        Invoke("DelayedStart", 8);
-
-        PopulateOppositeDict();
-
         gameManager = GameManager.instance;
         soundManager = SoundManager.instance;
-        statsManager = StatsManager.instance;
 
-        spellsStandard = spellLibrary.spells;
-
-        PopulateSpellList(spellsStandard);
-        CheckCosts();
+        PopulateOppositeDict();
         PopulateAnimationDictionary();
+
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            Invoke("DelayedStart", 8);
+
+            statsManager = StatsManager.instance;
+
+            spellsStandard = spellLibrary.spells;
+
+            PopulateSpellList(spellsStandard);
+            CheckCosts();
+        }
     }
 
     void PopulateOppositeDict()
@@ -217,6 +221,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
             float modifier = environment;
             float damagePreRounding = ((22 * power * attack / defense / 50)) * modifier;
 
+            if (spell.category == "Attack")
+                damagePreRounding++;
+
             int damage = Mathf.RoundToInt(damagePreRounding);
 
             if (spell.eatMana)
@@ -284,8 +291,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
             myPlayerControl.burnt = false;
             statsManager.myPsnObj.SetActive(false);
             statsManager.myBrnObj.SetActive(false);
-            base.photonView.RPC("RPC_Antidote", RpcTarget.Others);
-            gameManager.DisplayMessage("You cured yourself of poison and burn");
+            TournamentHost.instance.SetPsnBrn(statsManager.myName.text, "psn", false);
+            TournamentHost.instance.SetPsnBrn(statsManager.myName.text, "brn", false);
+            base.photonView.RPC("RPC_Antidote", RpcTarget.Others, statsManager.myName.text);
         }
 
         //Heal
@@ -373,15 +381,15 @@ public class SpellCaster : MonoBehaviourPunCallbacks
                 {
                     theirPlayerControl.poisoned = true;
                     statsManager.theirPsnObj.SetActive(true);
-                    gameManager.DisplayMessage("Opponent was poisoned");
-                    base.photonView.RPC("RPC_Poison", RpcTarget.Others, true);
+                    TournamentHost.instance.SetPsnBrn(statsManager.theirName.text, "psn", true);
+                    base.photonView.RPC("RPC_Poison", RpcTarget.Others, true, statsManager.theirName.text);
                 }
                 if (type == "Burn" && theirPlayerControl.burnt == false)
                 {
                     theirPlayerControl.burnt = true;
                     statsManager.theirBrnObj.SetActive(true);
-                    gameManager.DisplayMessage("Opponent was burned");
-                    base.photonView.RPC("RPC_Burn", RpcTarget.Others, true);
+                    TournamentHost.instance.SetPsnBrn(statsManager.theirName.text, "brn", true);
+                    base.photonView.RPC("RPC_Burn", RpcTarget.Others, true, statsManager.theirName.text);
                 }
             }
             else
@@ -390,15 +398,15 @@ public class SpellCaster : MonoBehaviourPunCallbacks
                 {
                     myPlayerControl.poisoned = true;
                     statsManager.myPsnObj.SetActive(true);
-                    gameManager.DisplayMessage("Your were poisoned");
-                    base.photonView.RPC("RPC_Poison", RpcTarget.Others, false);
+                    TournamentHost.instance.SetPsnBrn(statsManager.myName.text, "psn", true);
+                    base.photonView.RPC("RPC_Poison", RpcTarget.Others, false, statsManager.myName.text);
                 }
                 if (type == "Burn" && myPlayerControl.burnt == false)
                 {
                     myPlayerControl.burnt = true;
                     statsManager.myBrnObj.SetActive(true);
-                    gameManager.DisplayMessage("You were burned");
-                    base.photonView.RPC("RPC_Burn", RpcTarget.Others, false);
+                    TournamentHost.instance.SetPsnBrn(statsManager.myName.text, "brn", true);
+                    base.photonView.RPC("RPC_Burn", RpcTarget.Others, false, statsManager.myName.text);
                 }
             }
         }
@@ -428,50 +436,64 @@ public class SpellCaster : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_Counter()
     {
-        statsManager.theirCounter = true;
+        if(!SaveLoad.instance.tournamentHost)
+            statsManager.theirCounter = true;
     }
 
-    [PunRPC]
-    private void RPC_Antidote()
-    {
-        gameManager.DisplayMessage(theirPlayerControl.screenName + " cured themselves of poison and burn.");
-        theirPlayerControl.poisoned = false;
-        theirPlayerControl.burnt = false;
-        statsManager.theirPsnObj.SetActive(false);
-        statsManager.theirBrnObj.SetActive(false);
-    }
 
     [PunRPC]
-    private void RPC_Poison(bool hitMe)
+    private void RPC_Antidote(string name)
     {
-        if (hitMe)
+        gameManager.DisplayPublicMessage(name + " cured themselves of poison and burn.");
+
+        if (!SaveLoad.instance.tournamentHost)
         {
-            gameManager.DisplayMessage("You were poisoned");
-            myPlayerControl.poisoned = true;
-            statsManager.myPsnObj.SetActive(true);
-        }
-        else
-        {
-            gameManager.DisplayMessage("Opponent was poisoned");
-            theirPlayerControl.poisoned = true;
-            statsManager.theirPsnObj.SetActive(true);
+            theirPlayerControl.poisoned = false;
+            theirPlayerControl.burnt = false;
+            statsManager.theirPsnObj.SetActive(false);
+            statsManager.theirBrnObj.SetActive(false);
         }
     }
 
     [PunRPC]
-    private void RPC_Burn(bool hitMe)
+    private void RPC_Poison(bool hitMe, string name)
     {
-        if (hitMe)
+        if (!SaveLoad.instance.tournamentHost)
         {
-            gameManager.DisplayMessage("You were burned");
-            myPlayerControl.burnt = true;
-            statsManager.myBrnObj.SetActive(true);
+            if (hitMe)
+            {
+                myPlayerControl.poisoned = true;
+                statsManager.myPsnObj.SetActive(true);
+                TournamentHost.instance.SetPsnBrn(statsManager.myName.text, "psn", true);
+            }
+            else
+            {
+                gameManager.DisplayPublicMessage(name + " was poisoned");
+                theirPlayerControl.poisoned = true;
+                statsManager.theirPsnObj.SetActive(true);
+                TournamentHost.instance.SetPsnBrn(statsManager.theirName.text, "psn", true);
+            }
         }
-        else
+    }
+
+    [PunRPC]
+    private void RPC_Burn(bool hitMe, string name)
+    {
+        if (!SaveLoad.instance.tournamentHost)
         {
-            gameManager.DisplayMessage("Opponent was burned");
-            theirPlayerControl.burnt = true;
-            statsManager.theirBrnObj.SetActive(true);
+            if (hitMe)
+            {
+                myPlayerControl.burnt = true;
+                statsManager.myBrnObj.SetActive(true);
+                TournamentHost.instance.SetPsnBrn(statsManager.myName.text, "brn", true);
+            }
+            else
+            {
+                gameManager.DisplayPublicMessage(name + " was burned");
+                theirPlayerControl.burnt = true;
+                statsManager.theirBrnObj.SetActive(true);
+                TournamentHost.instance.SetPsnBrn(statsManager.theirName.text, "brn", true);
+            }
         }
     }
 
@@ -493,6 +515,8 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         base.photonView.RPC("RPC_ThemToMe", RpcTarget.Others, _projectile);
     }
 
+
+
     public IEnumerator Projectile(Vector3 _projectileStart, Vector3 _projectileEnd, string _projectile)
     {
         myPlayerControl.canMove = false;
@@ -504,14 +528,19 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         temp.GetComponent<Projectile>().projectileStart = _projectileStart;
         temp.GetComponent<Projectile>().projectileEnd = _projectileEnd;
         temp.transform.LookAt(_projectileEnd);
+
+        TournamentHost.instance.SubmitAttackProjectile(_projectileStart, _projectileEnd, _projectile);
     }
 
     [PunRPC]
     public void RPC_ThemToMe(string _projectile)
     {
-        projectileStart = gameManager.theirPlayer.transform.position;
-        projectileEnd = gameManager.myPlayer.transform.position;
-        StartCoroutine(Projectile(projectileStart, projectileEnd, _projectile));
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            projectileStart = gameManager.theirPlayer.transform.position;
+            projectileEnd = gameManager.myPlayer.transform.position;
+            StartCoroutine(Projectile(projectileStart, projectileEnd, _projectile));
+        }
     }
 
     public void TheirLocationEffect(string effect)
@@ -526,9 +555,12 @@ public class SpellCaster : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_TheirLocationEffect(string effect)
     {
-        targetPos = gameManager.myPlayer.transform.position;
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            targetPos = gameManager.myPlayer.transform.position;
 
-        StartCoroutine(StationaryEffect(effect));
+            StartCoroutine(StationaryEffect(effect));
+        }
     }
 
     public void MyLocationEffect(string effect)
@@ -543,9 +575,12 @@ public class SpellCaster : MonoBehaviourPunCallbacks
     [PunRPC]
     public void RPC_MyLocationEffect(string effect)
     {
-        targetPos = gameManager.theirPlayer.transform.position;
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            targetPos = gameManager.theirPlayer.transform.position;
 
-        StartCoroutine(StationaryEffect(effect));
+            StartCoroutine(StationaryEffect(effect));
+        }
     }
 
     public IEnumerator StationaryEffect(string effect)
@@ -557,6 +592,8 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         if (!effect.Contains("Pre"))
             terraScript.Cast();
         Instantiate(animationDict[effect], targetPos, Quaternion.identity);
+
+        TournamentHost.instance.SubmitAttackLocation(targetPos, effect); //make sure this onyl triggers once per player
     }
 
 }

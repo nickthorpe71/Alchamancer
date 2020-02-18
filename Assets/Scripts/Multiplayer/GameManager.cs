@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public int otherPlayerSkin;
     public int otherPlayerRP;
 
-    [Header("Timer")]
+    [Header("TurnTimer")]
     private int timePerTurn = 90;
     private int timeRemaining;
     public GameObject timer;
@@ -89,13 +89,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         soundManager.gameManager = this;
         soundManager.RandomizeMusic(tracks);
 
-        Invoke("TurnFalse", 1);
-        Invoke("Setup", 3);
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            Invoke("TurnFalse", 1);
+            Invoke("Setup", 3);
 
-        InvokeRepeating("CheckOtherPlayerDrop", 10, 2);
+            InvokeRepeating("CheckOtherPlayerDrop", 10, 2);
 
-        canWin = true;
+            canWin = true;
+        }
+
         turnCounter = 0;
+
     }
 
     private void Setup()
@@ -169,7 +174,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void NextTurn()
     {
-        if (myTurn)
+        if (myTurn && !SaveLoad.instance.tournamentHost)
         {
             if (terraScript.energy == 0 || timeRemaining == 0)
             {
@@ -214,34 +219,40 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     void TurnTrue()
     {
-        DisplayMessage("Your turn");
-        turnCounter++;
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            DisplayMessage("Your turn");
+            turnCounter++;
 
-        myTurn = true;
+            myTurn = true;
 
-        playerControl.NextTurn();
-        terraScript.canTake = true;
+            playerControl.NextTurn();
+            terraScript.canTake = true;
 
-        timer.SetActive(true);
-        timeRemaining = timePerTurn;
-        timerText.text = timeRemaining.ToString();
-        timing = true;
+            timer.SetActive(true);
+            timeRemaining = timePerTurn;
+            timerText.text = timeRemaining.ToString();
+            timing = true;
+        }
 
     }
 
     void TurnFalse()
     {
-        myTurn = false;
-        playerControl.canMove = false;
-        playerControl.DoT();
-        terraScript.canTake = false;
-
-        for (int i = 0; i < buttons.Count; i++)
+        if (!SaveLoad.instance.tournamentHost)
         {
-            buttons[i].interactable = false;
-        }
+            myTurn = false;
+            playerControl.canMove = false;
+            playerControl.DoT();
+            terraScript.canTake = false;
 
-        timer.SetActive(false);
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                buttons[i].interactable = false;
+            }
+
+            timer.SetActive(false);
+        }
     }
 
     public void CameraShake()
@@ -267,7 +278,10 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void DisplayMessage(string dialogue)
     {
-        playerControl.canMove = false;
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            playerControl.canMove = false;
+        }
 
         dialogueList.Add(dialogue);
 
@@ -359,24 +373,27 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void RageQuit()
     {
-        StatsManager.instance.MyHealth(1000 * -1, false);
-        DisplayPublicMessage(playerControl.screenName + " has exited the game");
-
-        canWin = false;
-
-        for (int i = 0; i < buttons.Count; i++)
+        if (!SaveLoad.instance.tournamentHost)
         {
-            buttons[i].interactable = false;
+            StatsManager.instance.MyHealth(1000 * -1, false);
+            DisplayPublicMessage(playerControl.screenName + " has exited the game");
+
+            canWin = false;
+
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                buttons[i].interactable = false;
+            }
+
+            SaveLoad.instance.otherPlayerRP = otherPlayerRP;
+            soundManager.musicSource.Stop();
+
+            PhotonNetwork.LeaveRoom();
+            GetComponent<SceneSelect>().LoseScreen();
+
+            GetComponent<PauseMenu>().pauseMenu.SetActive(false);
+            GetComponent<PauseMenu>().settingsMenu.SetActive(false);
         }
-
-        SaveLoad.instance.otherPlayerRP = otherPlayerRP;
-        soundManager.musicSource.Stop();
-
-        PhotonNetwork.LeaveRoom();
-        GetComponent<SceneSelect>().LoseScreen();
-
-        GetComponent<PauseMenu>().pauseMenu.SetActive(false);
-        GetComponent<PauseMenu>().settingsMenu.SetActive(false);
     }
 
     public void GameOver()
@@ -394,41 +411,46 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public IEnumerator LoseRoutine()
     {
-        canWin = false;
-
-        for (int i = 0; i < buttons.Count; i++)
+        if (!SaveLoad.instance.tournamentHost)
         {
-            buttons[i].interactable = false;
+            canWin = false;
+
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                buttons[i].interactable = false;
+            }
+
+            SaveLoad.instance.otherPlayerRP = otherPlayerRP;
+            SaveLoad.instance.otherPlayerName = StatsManager.instance.theirName.text;
+            SaveLoad.instance.onlineMatch = true;
+
+            soundManager.PlaySingle(gameOverSound, 1);
+            soundManager.musicSource.Stop();
+
+            yield return new WaitForSeconds(0.5f);
+
+            if (playerControl.animator != null && playerControl != null)
+            {
+                playerControl.AnimBoolFalse();
+                playerControl.FacingBoolReset();
+                playerControl.animator.SetBool("FaceFront", true);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+
+            if (playerControl.animator != null && playerControl != null)
+            {
+                playerControl.AnimBoolFalse();
+                playerControl.FacingBoolReset();
+                playerControl.animator.SetBool("Death", true);
+                playerControl.canMove = false;
+            }
+
+            DisplayMessage("You have been defeated!");
+            yield return new WaitForSeconds(5);
+            PhotonNetwork.LeaveRoom();
+            GetComponent<SceneSelect>().LoseScreen();
         }
-
-        SaveLoad.instance.otherPlayerRP = otherPlayerRP;
-
-        soundManager.PlaySingle(gameOverSound, 1);
-        soundManager.musicSource.Stop();
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (playerControl.animator != null && playerControl != null)
-        {
-            playerControl.AnimBoolFalse();
-            playerControl.FacingBoolReset();
-            playerControl.animator.SetBool("FaceFront", true);
-        }
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (playerControl.animator != null && playerControl != null)
-        {
-            playerControl.AnimBoolFalse();
-            playerControl.FacingBoolReset();
-            playerControl.animator.SetBool("Death", true);
-            playerControl.canMove = false;
-        }
-
-        DisplayMessage("You have been defeated!");
-        yield return new WaitForSeconds(5);
-        PhotonNetwork.LeaveRoom();
-        GetComponent<SceneSelect>().LoseScreen();
     }
 
     [PunRPC]
@@ -440,46 +462,51 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public IEnumerator WinRoutine()
     {
-        canWin = false;
-        
-        for (int i = 0; i < buttons.Count; i++)
+        if (!SaveLoad.instance.tournamentHost)
         {
-            buttons[i].interactable = false;
+            canWin = false;
+
+            for (int i = 0; i < buttons.Count; i++)
+            {
+                buttons[i].interactable = false;
+            }
+
+            if (StatsManager.instance.myHP < 0)
+                StatsManager.instance.myHP = 0;
+
+            SaveLoad.instance.otherPlayerRP = otherPlayerRP;
+            SaveLoad.instance.otherPlayerName = StatsManager.instance.theirName.text;
+            SaveLoad.instance.onlineMatch = true;
+
+            playerControl.canMove = false;
+
+            yield return new WaitForSeconds(1);
+
+            DisplayMessage("Well done! You win!");
+
+            yield return new WaitForSeconds(0.5f);
+
+            if (playerControl.animator != null && playerControl != null)
+            {
+                playerControl.AnimBoolFalse();
+                playerControl.FacingBoolReset();
+                playerControl.animator.SetBool("FaceFront", true);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+
+            if (playerControl.animator != null && playerControl != null)
+            {
+                playerControl.AnimBoolFalse();
+                playerControl.FacingBoolReset();
+                playerControl.animator.SetBool("Win", true);
+            }
+
+            yield return new WaitForSeconds(3f);
+
+            PhotonNetwork.LeaveRoom();
+            GetComponent<SceneSelect>().WinScreen();
         }
-
-        if (StatsManager.instance.myHP < 0)
-            StatsManager.instance.myHP = 0;
-
-        SaveLoad.instance.otherPlayerRP = otherPlayerRP;
-
-        playerControl.canMove = false;
-
-        yield return new WaitForSeconds(1);
-
-        DisplayMessage("Well done! You win!");
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (playerControl.animator != null && playerControl != null)
-        {
-            playerControl.AnimBoolFalse();
-            playerControl.FacingBoolReset();
-            playerControl.animator.SetBool("FaceFront", true);
-        }
-
-        yield return new WaitForSeconds(0.5f);
-
-        if (playerControl.animator != null && playerControl != null)
-        {
-            playerControl.AnimBoolFalse();
-            playerControl.FacingBoolReset();
-            playerControl.animator.SetBool("Win", true);
-        }
-
-        yield return new WaitForSeconds(3f);
-
-        PhotonNetwork.LeaveRoom();
-        GetComponent<SceneSelect>().WinScreen();
     }
 
     void CheckOtherPlayerDrop()
@@ -507,35 +534,38 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void OnApplicationQuit()
     {
-        Scene currentScene = SceneManager.GetActiveScene();
-
-        string sceneName = currentScene.name;
-
-        if (sceneName == "Forest")
+        if (!SaveLoad.instance.tournamentHost)
         {
-            string tempRP = StatsManager.instance.theirRP.text.Substring(2, StatsManager.instance.theirRP.text.Length - 3);
-            Debug.Log("Their RP from Stats " + StatsManager.instance.theirRP.text);
+            Scene currentScene = SceneManager.GetActiveScene();
 
-            int otherPlayerRP = int.Parse(tempRP);
+            string sceneName = currentScene.name;
 
-            int startRP = SaveLoad.instance.playerRP;
-            int finalRP = CalculateFinalRP(startRP, otherPlayerRP);
-            SaveLoad.instance.playerRP = finalRP;
-            SaveLoad.instance.Save();
-
-            int CalculateFinalRP(int myRP, int opponentRP)
+            if (sceneName == "Forest")
             {
-                float exponent = (opponentRP - myRP) / 400;
-                float expectedRP = 1 / (1 + Mathf.Pow(10, exponent));
-                float newRP = startRP + 320 * (0 - expectedRP);
+                string tempRP = StatsManager.instance.theirRP.text.Substring(2, StatsManager.instance.theirRP.text.Length - 3);
+                Debug.Log("Their RP from Stats " + StatsManager.instance.theirRP.text);
 
-                return Mathf.RoundToInt(newRP);
+                int otherPlayerRP = int.Parse(tempRP);
+
+                int startRP = SaveLoad.instance.playerRP;
+                int finalRP = CalculateFinalRP(startRP, otherPlayerRP);
+                SaveLoad.instance.playerRP = finalRP;
+                SaveLoad.instance.Save();
+
+                int CalculateFinalRP(int myRP, int opponentRP)
+                {
+                    float exponent = (opponentRP - myRP) / 400;
+                    float expectedRP = 1 / (1 + Mathf.Pow(10, exponent));
+                    float newRP = startRP + 320 * (0 - expectedRP);
+
+                    return Mathf.RoundToInt(newRP);
+                }
+
+                Debug.Log("Player Quit Durring Match - Logging Loss - RP = " + SaveLoad.instance.playerRP);
+                string dataFormatName = Database.instance.FormatUsername(SaveLoad.instance.playerName);
+                Database.RemoveRow(dataFormatName);
+                Database.AddNewRow(SaveLoad.instance.playerName, SaveLoad.instance.playerRP, 0, SystemInfo.deviceUniqueIdentifier);
             }
-
-            Debug.Log("Player Quit Durring Match - Logging Loss - RP = " + SaveLoad.instance.playerRP);
-            string dataFormatName = Database.instance.FormatUsername(SaveLoad.instance.playerName);
-            Database.RemoveRow(dataFormatName);
-            Database.AddNewRow(SaveLoad.instance.playerName, SaveLoad.instance.playerRP, 0, SystemInfo.deviceUniqueIdentifier);
         }
     }
 

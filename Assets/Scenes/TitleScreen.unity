@@ -14826,7 +14826,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e43b8b8b2e0446a685e185de9d9f843, type: 3}
   m_Name: 
@@ -20006,7 +20006,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1061327943
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20043,6 +20043,9 @@ MonoBehaviour:
   sfxVolume: 1
   musicVolume: 1
   otherPlayerRP: 0
+  otherPlayerName: 
+  onlineMatch: 0
+  tournamentHost: 0
 --- !u!114 &1061327945
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20071,7 +20074,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelScene: 1
   currentScene: 1
-  isOnline: 0
   levelString: 
   aIAcvive: 0
 --- !u!4 &1061327947

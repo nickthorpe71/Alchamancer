@@ -1,11 +1,14 @@
 ﻿using Photon.Pun;
 using UnityEngine;
+using Photon.Realtime;
 public class QuickStartRoomController : MonoBehaviourPunCallbacks
 {
     [SerializeField]
     private int multiplayerSceneIndex; //Number for the build index to the multiplay scene.
 
     public int numberOfPlayersInRoom;
+
+    public bool isTournament;
 
     public override void OnEnable()
     {
@@ -23,8 +26,16 @@ public class QuickStartRoomController : MonoBehaviourPunCallbacks
 
     void CheckStart()
     {
-        if (numberOfPlayersInRoom >= 2)
-            StartGame();
+        if (isTournament)
+        {
+            if (numberOfPlayersInRoom >= 3)
+                StartGame();
+        }
+        else
+        {
+            if (numberOfPlayersInRoom >= 2)
+                StartGame();
+        }
     }
 
     public override void OnJoinedRoom() //Callback function for when we successfully create or join a room.
@@ -42,6 +53,10 @@ public class QuickStartRoomController : MonoBehaviourPunCallbacks
     public void RPC_IncreasePlayers()
     {
         numberOfPlayersInRoom++;
+        Debug.Log("New Player Joined. Total: " + numberOfPlayersInRoom);
+
+        if(numberOfPlayersInRoom > 1)
+            PhotonNetwork.SetMasterClient(PhotonNetwork.PlayerList[1]);
     }
 
     private void StartGame() //Function for loading into the multiplayer scene.

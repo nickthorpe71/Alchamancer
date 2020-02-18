@@ -29,11 +29,12 @@ public class AddNewsScreen : MonoBehaviour
 
     public void LoadOldNews1()
     {
-        news1Obj.gameObject.GetComponent<InputField>().text = Database.instance.newsArr[0];
+        //need to replace these two with single search
+        //news1Obj.gameObject.GetComponent<InputField>().text = Database.instance.newsArr[0];
     }
     public void LoadOldNews2()
     {
-        news2Obj.gameObject.GetComponent<InputField>().text = Database.instance.newsArr[1];
+        //news2Obj.gameObject.GetComponent<InputField>().text = Database.instance.newsArr[1];
     }
 
     public void Upload1()
@@ -90,43 +91,87 @@ public class AddNewsScreen : MonoBehaviour
 
     public void AddRP()
     {
-        Row[] usernames = Database.instance.rows;
+        StartCoroutine(AddRPRoutine());
+    }
+
+    public IEnumerator AddRPRoutine()
+    {
+        WWW www = new WWW(Database.instance.webURL + Database.instance.privateCode + "/pipe-get/" + WWW.EscapeURL(username.text));
+        yield return www;
+
+        if (string.IsNullOrEmpty(www.error))
+        {
+            if(www.text == "")
+                AddRPNotFound();
+            else
+                AddRPFound(www.text);
+        }
+        else
+        {
+            print("Error pulling Alchamancer info " + www.error);
+        }
+    }
+
+    public void AddRPFound(string textStream)
+    {
+        print(textStream);
+
+        string[] entryInfo = textStream.Split(new char[] { '|' });
+
+        string usernameInfo = entryInfo[0];
+        int rpInfo = int.Parse(entryInfo[1]);
+        int extraInfo = int.Parse(entryInfo[2]);
+        string IDInfo = entryInfo[3];
+
+        Row row = new Row(usernameInfo, rpInfo, extraInfo, IDInfo);
 
         string usernameForDB = FormatForDatabase(username.text);
         int newAmount;
 
-        bool userFound = false;
-
-        for (int i = 0; i < usernames.Length; i++)
-        {
-            if(usernames[i].username == usernameForDB)
-            {
-                newAmount = int.Parse(amount.text) + usernames[i].rp;
-                Database.AddNewRow(usernameForDB, newAmount, usernames[i].extra, usernames[i].ID);
-                userFound = true;
-            }
-        }
-
-        if (!userFound)
-        {
-            Database.AddNewRow(usernameForDB, int.Parse(amount.text), 0, "0");
-        }
+        newAmount = int.Parse(amount.text) + rpInfo;
+        Database.AddNewRow(usernameForDB, newAmount, extraInfo, IDInfo);
     }
 
-    public void AddExpToAlchamancer()
+    public void AddRPNotFound()
     {
-        Row[] usernames = Database.instance.rows;
-        int newExp = 0;
+        string usernameForDB = FormatForDatabase(username.text);
 
-        for (int i = 0; i < usernames.Length; i++)
+        Database.AddNewRow(usernameForDB, int.Parse(amount.text), 0, "Fresh");
+    }
+
+    public void AddAlchaExpRP()
+    {
+        StartCoroutine(AddAlchaExpRoutine());
+    }
+
+    public IEnumerator AddAlchaExpRoutine()
+    {
+        WWW www = new WWW(Database.instance.webURL + Database.instance.privateCode + "/pipe-get/" + WWW.EscapeURL("Alchamancer"));
+        yield return www;
+
+        if (string.IsNullOrEmpty(www.error))
         {
-            if (usernames[i].username == "Alchamancer")
-            {
-                newExp = int.Parse(amountOfExp.text) + usernames[i].extra;
-                Database.AddNewRow(usernames[i].username, usernames[i].rp, newExp, usernames[i].ID);
-            }
+            AddAlchaExpFinal(www.text);
         }
-        
+        else
+            print("Error pulling Alchamancer info " + www.error);
+    }
+
+    public void AddAlchaExpFinal(string textStream)
+    {
+        string[] entryInfo = textStream.Split(new char[] { '|' });
+
+        string usernameInfo = entryInfo[0];
+        int rpInfo = int.Parse(entryInfo[1]);
+        int extraInfo = int.Parse(entryInfo[2]);
+        string IDInfo = entryInfo[3];
+
+        Row row = new Row(usernameInfo, rpInfo, extraInfo, IDInfo);
+
+        int newAmount = int.Parse(amountOfExp.text) + extraInfo;
+
+        Database.RemoveRow("Alchamancer");
+        Database.AddNewRow("Alchamancer", rpInfo, newAmount, IDInfo);
     }
 
     //subs out spaces for + before removing row from database

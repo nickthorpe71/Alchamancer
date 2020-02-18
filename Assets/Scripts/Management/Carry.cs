@@ -15,8 +15,6 @@ public class Carry : MonoBehaviourPunCallbacks
     public int levelScene = 1;
     public int currentScene;
 
-    public bool isOnline;
-
     public string levelString;
 
     public bool aIAcvive;

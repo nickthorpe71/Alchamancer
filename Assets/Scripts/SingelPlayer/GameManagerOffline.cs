@@ -313,6 +313,8 @@ public class GameManagerOffline : MonoBehaviour
         }
 
         SaveLoad.instance.otherPlayerRP = theirPlayer.GetComponent<OpponentCreator>().rp;
+        SaveLoad.instance.otherPlayerName = StatsManagerOffline.instance.theirName.text;
+        SaveLoad.instance.onlineMatch = false;
 
         soundManager.PlaySingle(gameOverSound, 1);
         soundManager.musicSource.Stop();
@@ -355,6 +357,8 @@ public class GameManagerOffline : MonoBehaviour
             StatsManagerOffline.instance.myHP = 0;
 
         SaveLoad.instance.otherPlayerRP = theirPlayer.GetComponent<OpponentCreator>().rp;
+        SaveLoad.instance.otherPlayerName = StatsManagerOffline.instance.theirName.text;
+        SaveLoad.instance.onlineMatch = false;
 
         playerControl.canMove = false;
 

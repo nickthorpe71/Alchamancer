@@ -54,28 +54,60 @@ public class ChangeName : MonoBehaviourPunCallbacks
         return dataFormat;
     }
 
-    public void OnDownloadNames (Row[] rows)
+    public void OnClickChangeName()
+    {
+        StartCoroutine(ChangeNameRoutine());
+    }
+
+    public IEnumerator ChangeNameRoutine()
+    {
+        string dataFormatNameOld = FormatForDatabase(SaveLoad.instance.playerName);
+
+        WWW www = new WWW(Database.instance.webURL + Database.instance.privateCode + "/pipe-get/" + WWW.EscapeURL(newName.text));
+        yield return www;
+
+        if (string.IsNullOrEmpty(www.error))
+        {
+            print(www.text);
+
+            if (www.text == "")
+            {
+                WWW www2 = new WWW(Database.instance.webURL + Database.instance.privateCode + "/pipe-get/" + WWW.EscapeURL(dataFormatNameOld));
+                yield return www2;
+                ChangeNameFinal(www2.text, true);
+            }
+            else
+                ChangeNameFinal(www.text, false);
+        }
+        else
+        {
+            print("Error pulling Alchamancer info " + www.error);
+        }
+    }
+
+    public void ChangeNameFinal(string textStream, bool isAvailable)
     {
         bool isBadWord = badWords.Any(newName.text.ToLower().Contains);
-
-        bool nameIsAvailable = true;
 
         string dataFormatNameOld = FormatForDatabase(SaveLoad.instance.playerName);
         string dataFormatNameNew = FormatForDatabase(newName.text);
 
-        for (int i = 0; i < rows.Length; i++)
+        if (isAvailable)
         {
-            if (dataFormatNameNew == rows[i].username)
-                nameIsAvailable = false;
-        }
+            string[] entryInfo = textStream.Split(new char[] { '|' });
 
-        if (nameIsAvailable)
-        {
+            string usernameInfo = entryInfo[0];
+            int rpInfo = int.Parse(entryInfo[1]);
+            int extraInfo = int.Parse(entryInfo[2]);
+            string IDInfo = entryInfo[3];
+
+            Row row = new Row(usernameInfo, rpInfo, extraInfo, IDInfo);
+
             if (newName.text.Length >= 2)
             {
                 if (newName.text.Length <= 15)
                 {
-                    if (isBadWord || newName.text == "P1" || newName.text == "P2")
+                    if (isBadWord)
                     {
                         currentName.text = "That name may offend some users.";
 
@@ -90,17 +122,12 @@ public class ChangeName : MonoBehaviourPunCallbacks
                         }
 
                         int rp = 1000;
-                        int extra = 0;
 
-                        for (int i = 0; i < rows.Length; i++)
+                        if (dataFormatNameOld == row.username)
                         {
-                            if (dataFormatNameOld == rows[i].username)
-                            {
-                                rp = rows[i].rp;
-                                if (rp == 0)
-                                    rp = 1000;
-                                extra = rows[i].extra;
-                            }
+                            rp = row.rp;
+                            if (rp == 0)
+                                rp = 1000;
                         }
 
                         if (!isNewGame)
@@ -108,7 +135,7 @@ public class ChangeName : MonoBehaviourPunCallbacks
                             Database.RemoveRow(dataFormatNameOld);
                         }
 
-                        Database.AddNewRow(newName.text, rp, extra, SystemInfo.deviceUniqueIdentifier);
+                        Database.AddNewRow(newName.text, rp, row.extra, SystemInfo.deviceUniqueIdentifier);
                         currentName.text = newName.text;
                         SaveLoad.instance.playerName = newName.text;
                         SaveLoad.instance.Save();
@@ -142,11 +169,6 @@ public class ChangeName : MonoBehaviourPunCallbacks
             if (notSavedIndicator != null)
                 StartCoroutine(NotSavedNameRoutine());
         }
-    }
-
-    public void OnClickChangeName()
-    {
-        database.SendNames(this);
     }
 
     public IEnumerator SavedNameRoutine()

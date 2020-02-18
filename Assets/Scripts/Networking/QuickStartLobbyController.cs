@@ -74,6 +74,8 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
 
     public void QuickStart()
     {
+        roomController.isTournament = false;
+
         if (PhotonNetwork.IsConnected)
         {
             connectImage.SetActive(false);
@@ -85,7 +87,7 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
         else
         {
             connectImage.SetActive(true);
-            quickStartButton.SetActive(false);
+            quickStartButton.GetComponent<Button>().enabled = false;
             quickCancelButton.SetActive(false);
             PhotonNetwork.ConnectUsingSettings();
         }
@@ -97,12 +99,49 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
     }
     void CreateRoom()
     {
+        roomController.isTournament = false;
+
         Debug.Log("Creating room now");
         int randomRoomNumber = Random.Range(0, 10000); //creating a random name for the room
         RoomOptions roomOps = new RoomOptions() { IsVisible = true, IsOpen = true, MaxPlayers = 2, /*PlayerTtl = int.MaxValue*/ };
         PhotonNetwork.CreateRoom("Room" + randomRoomNumber, roomOps);
         Debug.Log(randomRoomNumber);
     }
+
+    public void CreateTournament()
+    {
+        roomController.isTournament = true;
+        SaveLoad.instance.tournamentHost = true;
+
+        PhotonNetwork.AutomaticallySyncScene = true;
+
+        Debug.Log("Creating tournament now");
+        RoomOptions roomOps = new RoomOptions() { IsVisible = false, IsOpen = true, MaxPlayers = 3};
+        PhotonNetwork.CreateRoom("Tournament" , roomOps);
+    }
+
+    public void JoinTournament()
+    {
+        roomController.isTournament = true;
+
+        if (PhotonNetwork.IsConnected)
+        {
+            connectImage.SetActive(false);
+            PhotonNetwork.AutomaticallySyncScene = true;
+            quickStartButton.SetActive(false);
+            quickCancelButton.SetActive(true);
+            PhotonNetwork.JoinRoom("Tournament");
+        }
+        else
+        {
+            connectImage.SetActive(true);
+            quickStartButton.GetComponent<Button>().enabled = false;
+            quickCancelButton.SetActive(false);
+            PhotonNetwork.ConnectUsingSettings();
+        }
+
+}
+
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         Debug.Log("Failed to create room... trying again");
@@ -110,6 +149,7 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
     }
     public void QuickCancel()
     {
+        SaveLoad.instance.tournamentHost = false;
         PhotonNetwork.AutomaticallySyncScene = false;
         quickCancelButton.SetActive(false);
         quickStartButton.SetActive(true);

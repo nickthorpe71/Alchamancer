@@ -42,7 +42,7 @@ public class WinScreen : MonoBehaviour
         CheckSkinImage();
 
         SoundManager.instance.RandomizeMusic(sceneTrack);
-        playerName.text = saveLoad.playerName;
+        playerName.text = "Congrats " + saveLoad.playerName + "!" + " You defeated " + saveLoad.otherPlayerName + "!";
         playerRP.text = startRP.ToString();
 
         int addedRP = finalRP - startRP;
@@ -55,7 +55,15 @@ public class WinScreen : MonoBehaviour
     {
         float exponent = (opponentRP - myRP) / 400f;
         float expectedRP = 1 / (1 + Mathf.Pow(10, exponent));
-        float newRP = startRP + 320 * (1 - expectedRP);
+
+        float newRP = startRP + 320 * (1 - expectedRP) + 10;
+
+        if (saveLoad.onlineMatch == true)
+            newRP = startRP + 320 * (1 - expectedRP) + 75;
+
+        if(saveLoad.otherPlayerName.Contains("Geist"))
+            newRP = startRP + 320 * (1 - expectedRP) + 35;
+
 
         return Mathf.RoundToInt(newRP);
     }

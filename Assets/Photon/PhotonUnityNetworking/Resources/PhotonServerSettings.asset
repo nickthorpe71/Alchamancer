@@ -71,5 +71,12 @@ MonoBehaviour:
   - RPC_SendLevelString
   - RPC_SpiritWalk
   - RPC_FillByCode
+  - RPC_StartTimer
+  - RPC_SetPlayerInfo
+  - RPC_AdjustHealthPlayerInfo
+  - RPC_AdjustHealth
+  - RPC_Projectile
+  - RPC_Location
+  - RPC_SetPsnBrn
   DisableAutoOpenWizard: 1
   ShowSettings: 1

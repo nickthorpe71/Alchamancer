@@ -32,17 +32,46 @@ public class DisplayScores : MonoBehaviour
                 if (listing != null)
                 {
                     listing.Initialize(rows[i].rp, rows[i].username);
-
-                    if (rows[i].username == SaveLoad.instance.playerName)
-                        myScore.Initialize(rows[i].rp, rows[i].username);
                 }
             }
         }
 
+        StartSetMyScore();
+
         if (loadingObj.activeSelf && loadingObj != null)
             loadingObj.SetActive(false);
+    }
 
-        
+    public void StartSetMyScore()
+    {
+        StartCoroutine(SetMyScoreRoutine());
+    }
+
+    public IEnumerator SetMyScoreRoutine()
+    {
+        WWW www = new WWW(database.webURL + database.privateCode + "/pipe-get/" + WWW.EscapeURL(SaveLoad.instance.playerName));
+        yield return www;
+
+        if (string.IsNullOrEmpty(www.error))
+        {
+            SetMyScore(www.text);
+        }
+        else
+            print("Error pulling Alchamancer info " + www.error);
+    }
+
+    public void SetMyScore(string textStream)
+    {
+        string[] entryInfo = textStream.Split(new char[] { '|' });
+
+        string username = entryInfo[0];
+        int rp = int.Parse(entryInfo[1]);
+        int extra = int.Parse(entryInfo[2]);
+        string ID = entryInfo[3];
+
+        Row row = new Row(username, rp, extra, ID);
+
+        myScore.Initialize(rp, username);
     }
 
     IEnumerator RefreshScores()

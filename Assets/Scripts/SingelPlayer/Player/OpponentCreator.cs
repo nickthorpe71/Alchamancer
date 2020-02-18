@@ -16,8 +16,8 @@ public class OpponentCreator : MonoBehaviour
     private Dictionary<char, List<char>> nextLetterLists = new Dictionary<char, List<char>>();
 
     private List<string> titles = new List<string>() {"the Hammer", "the Axe", "the Sword", "the Blade", "the Sharp", "the Jagged", "the Flayer", "the Slasher", "the Impaler", "the Hunter", "the Slayer", "the Mauler", "the Quick", "the Witch", "the Mad", "the Wraith", "the Shade", "the Dead", "the Unholy", "the Howler", "the Grim", "the Dark", "the Tainted", "the Unclean", "the Hungry", "the Cold", "the Wise", "the Just", "the Agile", "the Angelic", "the Blunt", "the Cowardly", "the Clever", "the Demonic", "the Drunk", "the King"};
-    private List<string> prefixes = new List<string>() {"Gloom", "Gray", "Dire", "Black", "Shadow", "Haze", "Wind", "Storm", "Warp", "Night", "Moon", "Star", "Pit", "Fire", "Cold", "Sharp", "Ash", "Blade", "Steel", "Stone", "Rust", "Arcane", "Mold", "Arcane", "Blight", "Plague", "Rot", "Ooze", "Puke", "Snot", "Bile", "Blood", "Pulse", "Gut", "Gore", "Flesh", "Bone", "Spine", "Mind", "Spirit", "Soul", "Wrath", "Grief", "Foul", "Vile", "Sin", "Chaos", "Dread", "Doom", "Bane", "Death", "Viper", "Dragon", "Devil", "Iron", "Angel", "Demon", "Flame", "Rose", "Ice", "Light", "Dark", "Slate", "Shade", "Witch", "Secret", "Blue", "Red", "Green", "Yellow", "White"};
-    private List<string> suffixes = new List<string>() { "Touch", "Spell", "Feast", "Wound", "Grin", "Maim", "Hack", "Bite", "Rend", "Burn", "Rip", "Kill", "Call", "Vex", "Jade", "Web", "Beard", "Shield", "Killer", "Razor", "Drinker", "Shifter", "Crawler", "Dancer", "Bender", "Weaver", "Eater", "Widow", "Maggot", "Worm", "Spawn", "Wight", "Grumble", "Growler", "Snarl", "Wolf", "Crow", "Hawk", "Cloud", "Bang", "Head", "Skull", "Brow", "Eye", "Maw", "Tongue", "Fang", "Horn", "Thorn", "Claw", "Fist", "Heart", "Shank", "Skin", "Wing", "Pox", "Fester", "Blister", "Pus", "Slime", "Drool", "Froth", "Sludge", "Venom", "Poison", "Break", "Shard", "Flame", "Maul", "Thirst", "Lust", "Gobbler", "Eagle", "Boar", "Wolf", "Viper", "Wing", "Song", "Hammer", "Axe", "Sword", "Spear", "Shield", "Cow"};
+    private List<string> prefixes = new List<string>() {"Gloom", "Gray", "Dire", "Black", "Shadow", "Haze", "Wind", "Storm", "Warp", "Night", "Moon", "Star", "Pit", "Fire", "Cold", "Sharp", "Ash", "Blade", "Steel", "Stone", "Rust", "Arcane", "Mold", "Arcane", "Blight", "Plague", "Rot", "Ooze", "Puke", "Snot", "Bile", "Blood", "Pulse", "Gut", "Gore", "Flesh", "Bone", "Spine", "Mind", "Spirit", "Soul", "Wrath", "Grief", "Foul", "Vile", "Sin", "Chaos", "Dread", "Doom", "Bane", "Death", "Viper", "Dragon", "Devil", "Iron", "Angel", "Demon", "Flame", "Rose", "Ice", "Light", "Dark", "Slate", "Shade", "Witch", "Secret", "Blue", "Red", "Green", "Yellow", "White", "Alex", "Vive", "Lylo", "Edward", "Grom", "Sin", "Jana"};
+    private List<string> suffixes = new List<string>() { "Touch", "Spell", "Feast", "Wound", "Grin", "Maim", "Hack", "Bite", "Rend", "Burn", "Rip", "Kill", "Call", "Vex", "Jade", "Web", "Beard", "Shield", "Killer", "Razor", "Drinker", "Shifter", "Crawler", "Dancer", "Bender", "Weaver", "Eater", "Widow", "Maggot", "Worm", "Spawn", "Wight", "Grumble", "Growler", "Snarl", "Wolf", "Crow", "Hawk", "Cloud", "Bang", "Head", "Skull", "Brow", "Eye", "Maw", "Tongue", "Fang", "Horn", "Thorn", "Claw", "Fist", "Heart", "Shank", "Skin", "Wing", "Pox", "Fester", "Blister", "Pus", "Slime", "Drool", "Froth", "Sludge", "Venom", "Poison", "Break", "Shard", "Flame", "Maul", "Thirst", "Lust", "Gobbler", "Eagle", "Boar", "Wolf", "Viper", "Wing", "Song", "Hammer", "Axe", "Sword", "Spear", "Shield", "Cow", "Thought", "Dream", "Lust", "Envy", "Sloth", "Pride", "Greed", "Wrath"};
 
     private void Awake()
     {
@@ -51,22 +51,25 @@ public class OpponentCreator : MonoBehaviour
 
     void StructureName()
     {
-        int structInt = Random.Range(0, 4);
+        int structInt = Random.Range(0, 5);
 
         int titleInt = Random.Range(0, titles.Count);
         int prefixInt = Random.Range(0, prefixes.Count);
         int suffixInt = Random.Range(0, suffixes.Count);
 
-        if (structInt == 0)
-            name = BuildRandomName() + " " + prefixes[prefixInt] + " " + suffixes[suffixInt];
+        if(structInt == 0)
+            name = prefixes[prefixInt] + " " + titles[titleInt];
         else if (structInt == 1)
+            name = BuildRandomName() + " " + prefixes[prefixInt] + " " + suffixes[suffixInt];
+        else if (structInt == 2)
             name = BuildRandomName() + " " + titles[titleInt];
-		else if (structInt == 2)
+		else if (structInt == 3)
 			name = prefixes[prefixInt] + " " + suffixes[suffixInt];
-		else if (structInt == 3 || structInt == 4)
+		else if (structInt == 4 || structInt == 5)
             name = BuildRandomName();
+        
 
-        if (skin == SaveLoad.instance.numOfAvailableSkins)
+        if (skin == 13)
             name = "Geist " + BuildRandomName();
     }
 

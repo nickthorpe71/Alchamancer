@@ -1,13 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Photon.Pun;
 using UnityEngine.UI;
 
-public class Terraform : MonoBehaviourPunCallbacks
+public class TerraformOffline : MonoBehaviour
 {
-    private GameManager gameManager;
-    private CellManager cellManager;
+    private GameManagerOffline gameManager;
+    private CellManagerOffline cellManager;
     private SoundManager soundManager;
 
     [Header("Elements")]
@@ -21,14 +20,15 @@ public class Terraform : MonoBehaviourPunCallbacks
     public GameObject dirt, water, plant, fire, rock, life, death;
 
     [Header("Player")]
-    private PlayerControl playerCon;
+    private PlayerControlOffline playerCon;
     public GameObject target;
     public bool canTake;
     public float castSpeed = 0.4f;
     private GameObject temp;
-    public Animator animator;
+    private Animator animator;
+    public bool isAI;
     public SpellSO antidoteSpell;
-    
+
     [Header("Energy and Mana")]
     public int energy = 4;
     public GameObject[] energyImages;
@@ -44,22 +44,17 @@ public class Terraform : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        cellManager = CellManager.instance;
-        gameManager = GameManager.instance;
+        cellManager = CellManagerOffline.instance;
+        gameManager = GameManagerOffline.instance;
         soundManager = SoundManager.instance;
-        playerCon = GetComponent<PlayerControl>();
+        playerCon = GetComponent<PlayerControlOffline>();
 
         animator = playerCon.animator;
 
         energyImages = gameManager.energyImages;
         manaImages = gameManager.manaImages;
 
-        if (!gameManager.gameStarted)
-        {
-            energy = 4;
-            CheckEnergy();
-            CheckMana();
-        }
+        CheckMana();
 
         dirt = cellManager.dirt;
         water = cellManager.water;
@@ -69,9 +64,11 @@ public class Terraform : MonoBehaviourPunCallbacks
         life = cellManager.life;
         death = cellManager.death;
 
-        takeButton = GameObject.FindGameObjectWithTag("Take");
-        takeButton.GetComponent<Button>().onClick.AddListener(delegate { Take(false); });
-
+        if (!isAI)
+        {
+            takeButton = GameObject.FindGameObjectWithTag("Take");
+            takeButton.GetComponent<Button>().onClick.AddListener(delegate { Take(false); });
+        }
     }
 
     public void DetermineTarget()
@@ -90,18 +87,17 @@ public class Terraform : MonoBehaviourPunCallbacks
 
     public void Take(bool eatMana)
     {
-        if (playerCon.PV.IsMine)
+        DetermineTarget();
+
+        if (currentMana < maxMana || eatMana)
         {
-            DetermineTarget();
-
-            if (currentMana < maxMana || eatMana)
+            if (energy > 0 || eatMana)
             {
-                if (energy > 0 || eatMana)
+                if (target != null)
                 {
-                    if (target.tag != "Dirt" && target != null)
+                    if (target.tag != "Dirt")
                     {
-
-                        if (target.tag != "DragonVein" && target != null)
+                        if (target.tag != "DragonVein")
                         {
                             Cast();
                             Vector3 tempVec = target.transform.position;
@@ -150,40 +146,49 @@ public class Terraform : MonoBehaviourPunCallbacks
                                         deathCount++;
                                     break;
                             }
-
                             PostTake(eatMana);
                             DetermineTarget();
                         }
                         else
                         {
-                            gameManager.DisplayMessage("Cannont absorb this ancient material.");
+                            if (!isAI)
+                                gameManager.DisplayMessage("Cannot absorb this ancient material.");
                         }
+
                     }
                     else
                     {
-                        gameManager.DisplayMessage("Nothing here.");
+                        if (!isAI)
+                            gameManager.DisplayMessage("Nothing here.");
                     }
                 }
                 else
                 {
-                    gameManager.DisplayMessage("You are out of energy until next turn.");
+                    if (!isAI)
+                        gameManager.DisplayMessage("Nothing here.");
                 }
             }
             else
             {
-                gameManager.DisplayMessage("Your body cannot hold any more mana. You must cast a spell to make room.");
+                if (!isAI)
+                    gameManager.DisplayMessage("You are out of energy until next turn.");
             }
         }
+        else
+        {
+            if (!isAI)
+                gameManager.DisplayMessage("Your body cannot hold any more mana. You must cast a spell to make room.");
+        }
 
+        gameManager.spellCaster.CheckCosts();
         if (gameManager.spellCaster.sorted)
             gameManager.spellCaster.SortButtonSorted();
-        gameManager.spellCaster.CheckCosts();
 
     }
 
     public void PostTake(bool eatMana)
     {
-        soundManager.PlaySinglePublic("takeSound", 0.8f);
+        soundManager.PlaySingle(takeSound, 0.8f);
 
         if (!eatMana)
         {
@@ -193,9 +198,12 @@ public class Terraform : MonoBehaviourPunCallbacks
         else
             currentMana += 2;
 
-        CheckEnergy();
-        CheckMana();
-        gameManager.UpdateElements();
+        if (!isAI)
+        {
+            CheckEnergy();
+            CheckMana();
+            gameManager.UpdateElements();
+        }
 
         DetermineTarget();
 
@@ -212,15 +220,6 @@ public class Terraform : MonoBehaviourPunCallbacks
             castRotation = Quaternion.Euler(0, 90, 0);
 
         temp.transform.GetChild(0).transform.rotation = castRotation;
-
-        base.photonView.RPC("SpawnTakeCastOther", RpcTarget.Others, target.transform.position, castRotation);
-    }
-
-    [PunRPC]
-    public void SpawnTakeCastOther(Vector3 position, Quaternion rotation)
-    {
-        temp = Instantiate(takeCast, position, Quaternion.identity);
-        temp.transform.GetChild(0).transform.rotation = rotation;
     }
 
     public void Cast()
@@ -241,6 +240,7 @@ public class Terraform : MonoBehaviourPunCallbacks
         playerCon.canMove = false;
         yield return new WaitForSeconds(castSpeed);
         playerCon.canMove = true;
+
     }
 
     public void CastFront()
@@ -248,7 +248,6 @@ public class Terraform : MonoBehaviourPunCallbacks
         ResetAnim();
         string trigger = "CastFront";
         animator.SetTrigger(trigger);
-        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
 
     public void CastBack()
@@ -256,27 +255,18 @@ public class Terraform : MonoBehaviourPunCallbacks
         ResetAnim();
         string trigger = "CastBack";
         animator.SetTrigger(trigger);
-        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
     public void CastLeft()
     {
         ResetAnim();
         string trigger = "CastLeft";
         animator.SetTrigger(trigger);
-        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
     public void CastRight()
     {
         ResetAnim();
         string trigger = "CastRight";
         animator.SetTrigger(trigger);
-        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
-    }
-
-    [PunRPC]
-    public void OtherCastAnim(string trigger)
-    {
-        gameManager.theirPlayer.GetComponent<PlayerControl>().currentSprite.GetComponent<Animator>().SetTrigger(trigger);
     }
 
     public void ResetAnim()
@@ -327,6 +317,8 @@ public class Terraform : MonoBehaviourPunCallbacks
             currentMana = 0;
 
         for (int i = 0; i < currentMana; i++)
+        {
             manaImages[i].SetActive(true);
+        }
     }
 }

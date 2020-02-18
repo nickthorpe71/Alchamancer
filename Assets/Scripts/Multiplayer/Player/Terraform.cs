@@ -1,12 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 using UnityEngine.UI;
 
-public class TerraformOffline : MonoBehaviour
+public class Terraform : MonoBehaviourPunCallbacks
 {
-    private GameManagerOffline gameManager;
-    private CellManagerOffline cellManager;
+    private GameManager gameManager;
+    private CellManager cellManager;
     private SoundManager soundManager;
 
     [Header("Elements")]
@@ -20,15 +21,14 @@ public class TerraformOffline : MonoBehaviour
     public GameObject dirt, water, plant, fire, rock, life, death;
 
     [Header("Player")]
-    private PlayerControlOffline playerCon;
+    private PlayerControl playerCon;
     public GameObject target;
     public bool canTake;
     public float castSpeed = 0.4f;
     private GameObject temp;
-    private Animator animator;
-    public bool isAI;
+    public Animator animator;
     public SpellSO antidoteSpell;
-
+    
     [Header("Energy and Mana")]
     public int energy = 4;
     public GameObject[] energyImages;
@@ -44,31 +44,38 @@ public class TerraformOffline : MonoBehaviour
 
     private void Start()
     {
-        cellManager = CellManagerOffline.instance;
-        gameManager = GameManagerOffline.instance;
+        cellManager = CellManager.instance;
+        gameManager = GameManager.instance;
         soundManager = SoundManager.instance;
-        playerCon = GetComponent<PlayerControlOffline>();
+        playerCon = GetComponent<PlayerControl>();
 
-        animator = playerCon.animator;
 
-        energyImages = gameManager.energyImages;
-        manaImages = gameManager.manaImages;
-
-        CheckMana();
-
-        dirt = cellManager.dirt;
-        water = cellManager.water;
-        plant = cellManager.plant;
-        fire = cellManager.fire;
-        rock = cellManager.rock;
-        life = cellManager.life;
-        death = cellManager.death;
-
-        if (!isAI)
+        if (!SaveLoad.instance.tournamentHost)
         {
+            animator = playerCon.animator;
+
+            energyImages = gameManager.energyImages;
+            manaImages = gameManager.manaImages;
+
+            if (!gameManager.gameStarted)
+            {
+                energy = 4;
+                CheckEnergy();
+                CheckMana();
+            }
+
+            dirt = cellManager.dirt;
+            water = cellManager.water;
+            plant = cellManager.plant;
+            fire = cellManager.fire;
+            rock = cellManager.rock;
+            life = cellManager.life;
+            death = cellManager.death;
+
             takeButton = GameObject.FindGameObjectWithTag("Take");
             takeButton.GetComponent<Button>().onClick.AddListener(delegate { Take(false); });
         }
+
     }
 
     public void DetermineTarget()
@@ -87,17 +94,18 @@ public class TerraformOffline : MonoBehaviour
 
     public void Take(bool eatMana)
     {
-        DetermineTarget();
-
-        if (currentMana < maxMana || eatMana)
+        if (playerCon.PV.IsMine)
         {
-            if (energy > 0 || eatMana)
+            DetermineTarget();
+
+            if (currentMana < maxMana || eatMana)
             {
-                if (target != null)
+                if (energy > 0 || eatMana)
                 {
-                    if (target.tag != "Dirt")
+                    if (target.tag != "Dirt" && target != null)
                     {
-                        if (target.tag != "DragonVein")
+
+                        if (target.tag != "DragonVein" && target != null)
                         {
                             Cast();
                             Vector3 tempVec = target.transform.position;
@@ -146,49 +154,40 @@ public class TerraformOffline : MonoBehaviour
                                         deathCount++;
                                     break;
                             }
+
                             PostTake(eatMana);
                             DetermineTarget();
                         }
                         else
                         {
-                            if (!isAI)
-                                gameManager.DisplayMessage("Cannont absorb this ancient material.");
+                            gameManager.DisplayMessage("Cannot absorb this ancient material.");
                         }
-
                     }
                     else
                     {
-                        if (!isAI)
-                            gameManager.DisplayMessage("Nothing here.");
+                        gameManager.DisplayMessage("Nothing here.");
                     }
                 }
                 else
                 {
-                    if (!isAI)
-                        gameManager.DisplayMessage("Nothing here.");
+                    gameManager.DisplayMessage("You are out of energy until next turn.");
                 }
             }
             else
             {
-                if (!isAI)
-                    gameManager.DisplayMessage("You are out of energy until next turn.");
+                gameManager.DisplayMessage("Your body cannot hold any more mana. You must cast a spell to make room.");
             }
         }
-        else
-        {
-            if (!isAI)
-                gameManager.DisplayMessage("Your body cannot hold any more mana. You must cast a spell to make room.");
-        }
 
-        gameManager.spellCaster.CheckCosts();
         if (gameManager.spellCaster.sorted)
             gameManager.spellCaster.SortButtonSorted();
+        gameManager.spellCaster.CheckCosts();
 
     }
 
     public void PostTake(bool eatMana)
     {
-        soundManager.PlaySingle(takeSound, 0.8f);
+        soundManager.PlaySinglePublic("takeSound", 0.8f);
 
         if (!eatMana)
         {
@@ -198,12 +197,9 @@ public class TerraformOffline : MonoBehaviour
         else
             currentMana += 2;
 
-        if (!isAI)
-        {
-            CheckEnergy();
-            CheckMana();
-            gameManager.UpdateElements();
-        }
+        CheckEnergy();
+        CheckMana();
+        gameManager.UpdateElements();
 
         DetermineTarget();
 
@@ -220,6 +216,15 @@ public class TerraformOffline : MonoBehaviour
             castRotation = Quaternion.Euler(0, 90, 0);
 
         temp.transform.GetChild(0).transform.rotation = castRotation;
+
+        base.photonView.RPC("SpawnTakeCastOther", RpcTarget.Others, target.transform.position, castRotation);
+    }
+
+    [PunRPC]
+    public void SpawnTakeCastOther(Vector3 position, Quaternion rotation)
+    {
+        temp = Instantiate(takeCast, position, Quaternion.identity);
+        temp.transform.GetChild(0).transform.rotation = rotation;
     }
 
     public void Cast()
@@ -240,7 +245,6 @@ public class TerraformOffline : MonoBehaviour
         playerCon.canMove = false;
         yield return new WaitForSeconds(castSpeed);
         playerCon.canMove = true;
-
     }
 
     public void CastFront()
@@ -248,6 +252,7 @@ public class TerraformOffline : MonoBehaviour
         ResetAnim();
         string trigger = "CastFront";
         animator.SetTrigger(trigger);
+        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
 
     public void CastBack()
@@ -255,18 +260,27 @@ public class TerraformOffline : MonoBehaviour
         ResetAnim();
         string trigger = "CastBack";
         animator.SetTrigger(trigger);
+        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
     public void CastLeft()
     {
         ResetAnim();
         string trigger = "CastLeft";
         animator.SetTrigger(trigger);
+        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
     public void CastRight()
     {
         ResetAnim();
         string trigger = "CastRight";
         animator.SetTrigger(trigger);
+        base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
+    }
+
+    [PunRPC]
+    public void OtherCastAnim(string trigger)
+    {
+        gameManager.theirPlayer.GetComponent<PlayerControl>().currentSprite.GetComponent<Animator>().SetTrigger(trigger);
     }
 
     public void ResetAnim()
@@ -317,8 +331,6 @@ public class TerraformOffline : MonoBehaviour
             currentMana = 0;
 
         for (int i = 0; i < currentMana; i++)
-        {
             manaImages[i].SetActive(true);
-        }
     }
 }

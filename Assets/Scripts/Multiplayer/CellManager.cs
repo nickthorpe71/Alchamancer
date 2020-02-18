@@ -59,15 +59,6 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
         elements.Add(life);
         elements.Add(death);
 
-        /*if (PhotonNetwork.IsConnected)
-        {
-            if (PhotonNetwork.IsMasterClient)
-            {
-                startString = carryScript.levelString;
-                FillByCode();
-            }
-        }*/
-
         startString = realString;
         FillByCode();
     }
@@ -232,12 +223,16 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
     void OnSceneFinishedLoading(Scene scene, LoadSceneMode mode)
     {
         Carry.instance.currentScene = scene.buildIndex;
-        if (Carry.instance.currentScene == Carry.instance.levelScene)
-        {
-            PhotonNetwork.Instantiate("NetworkPlayer", new Vector2(0, 0), Quaternion.identity);
 
-            /*if(PhotonNetwork.IsMasterClient)
-                base.photonView.RPC("RPC_PlayerJoined", RpcTarget.Others, Carry.instance.levelString);*/
+        if (!SaveLoad.instance.tournamentHost)
+        {
+            if (Carry.instance.currentScene == Carry.instance.levelScene)
+            {
+                PhotonNetwork.Instantiate("NetworkPlayer", new Vector2(0, 0), Quaternion.identity);
+
+                /*if(PhotonNetwork.IsMasterClient)
+                    base.photonView.RPC("RPC_PlayerJoined", RpcTarget.Others, Carry.instance.levelString);*/
+            }
         }
     }
 

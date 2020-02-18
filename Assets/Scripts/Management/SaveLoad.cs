@@ -21,6 +21,10 @@ public class SaveLoad : MonoBehaviour
     public float musicVolume = 1;
 
     public int otherPlayerRP;
+    public string otherPlayerName;
+    public bool onlineMatch;
+
+    public bool tournamentHost;
 
     void Awake()
     {

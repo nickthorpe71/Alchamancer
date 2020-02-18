@@ -10,7 +10,6 @@ public class Projectile : MonoBehaviour
     public AudioClip impactSound;
     public bool hasShake;
     
-    // Update is called once per frame
     void Update()
     {
         transform.position = Vector3.MoveTowards(transform.position, projectileEnd, 6f * Time.deltaTime);
@@ -29,10 +28,13 @@ public class Projectile : MonoBehaviour
             Destroy(this.gameObject);
             Instantiate(explosion, projectileEnd, Quaternion.identity);
 
-            if (GameManager.instance != null)
-                GameManager.instance.myPlayer.GetComponent<PlayerControl>().canMove = true;
-            else
-                GameManagerOffline.instance.myPlayer.GetComponent<PlayerControlOffline>().canMove = true;
+            if (!SaveLoad.instance.tournamentHost)
+            {
+                if (GameManager.instance != null)
+                    GameManager.instance.myPlayer.GetComponent<PlayerControl>().canMove = true;
+                else
+                    GameManagerOffline.instance.myPlayer.GetComponent<PlayerControlOffline>().canMove = true;
+            }
         }
     }
 }

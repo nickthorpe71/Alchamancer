@@ -5,17 +5,16 @@ using UnityEngine.SceneManagement;
 
 public class Database : MonoBehaviour
 {
-    const string privateCode = "XpXa0oOgz0Cn31iCgvP6zww_IStnP3Q0Sn-CyW1Iv43A";
-    const string publicCode = "5debdc7fb5622f683c282d00";
-    const string webURL = "https://www.dreamlo.com/lb/";
+    public string privateCode = "XpXa0oOgz0Cn31iCgvP6zww_IStnP3Q0Sn-CyW1Iv43A";
+    public string publicCode = "5debdc7fb5622f683c282d00";
+    public string webURL = "https://www.dreamlo.com/lb/";
 
     public static Database instance;
     public bool downloadComplete;
 
     public Row[] rows;
-    public string[] newsArr;
-    public string currentVersion;
-    public string totalDonation;
+
+    private bool gettingRow;
 
     private void Awake()
     {
@@ -29,14 +28,7 @@ public class Database : MonoBehaviour
             Destroy(gameObject);
         }
 
-        Download();
-    }
-
-    private void Start()
-    {
-        newsArr = new string[2];
-        newsArr[0] = "";
-        newsArr[1] = "";
+        //Download();
     }
 
     public static void AddNewRow(string username, int rp, int extra, string ID)
@@ -75,7 +67,7 @@ public class Database : MonoBehaviour
             print("Error removing " + www.error);
     }
 
-    public static void ClearAll()
+    public void ClearAll()
     {
         WWW www = new WWW(webURL + privateCode + "/clear");
     }
@@ -119,18 +111,6 @@ public class Database : MonoBehaviour
 
             if(currentScene.name == "LeaderBoard")
                 print(rows[i].username + " : " + rows[i].rp + " : " + extra + " : " + ID);
-
-            if (username == "News1")
-                newsArr[0] = ID;
-
-            if (username == "News2")
-                newsArr[1] = ID;
-
-            if (username == "Version")
-                currentVersion = ID;
-
-            if (username == "Alchamancer")
-                totalDonation = ID;
         }
 
         downloadComplete = true;
@@ -150,20 +130,6 @@ public class Database : MonoBehaviour
             target.OnDownloadedScores(rows);
     }
 
-    public void SendNames(ChangeName target)
-    {
-        StartCoroutine(CheckDownloadNames(target));
-    }
-
-    IEnumerator CheckDownloadNames(ChangeName target)
-    {
-        while (!downloadComplete)
-            yield return null;
-
-        if (target != null)
-            target.OnDownloadNames(rows);
-    }
-
     public void SendAlchamancer(AlchaLevels target)
     {
         StartCoroutine(CheckDownloadAlchamancer(target));
@@ -175,21 +141,7 @@ public class Database : MonoBehaviour
             yield return null;
 
         if (target != null)
-            target.SetInfo(rows);
-    }
-
-    public void SendNewsAndVersion(MainMenu target)
-    {
-        StartCoroutine(CheckDownloadNewsVersion(target));
-    }
-
-    IEnumerator CheckDownloadNewsVersion(MainMenu target)
-    {
-        while (!downloadComplete)
-            yield return null;
-
-        if (target != null)
-            target.OnDownloadNews(rows);
+            target.StartSetInfo();
     }
 
     public string FormatUsername(string username)

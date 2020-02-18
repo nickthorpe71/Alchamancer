@@ -25,12 +25,16 @@ public class MainMenu : MonoBehaviour
 
     public Text news;
     private int newsInt = 1;
+    private string news1;
+    private string news2;
+    private bool newsInitialized;
 
     private SoundManager soundManager;
     private SaveLoad saveLoad;
 
     public GameObject checkVersion;
     private bool versionMsgDisplayed;
+    private string currentVersion;
 
     public List<GameObject> skins = new List<GameObject>();
 
@@ -67,7 +71,7 @@ public class MainMenu : MonoBehaviour
             soundManager.musicSource.Play();
         }
 
-        InvokeRepeating("RotateNews", 1f, 10);
+        InvokeRepeating("Refresh", 0, 30);
     }
 
     void CheckForC()
@@ -127,10 +131,96 @@ public class MainMenu : MonoBehaviour
         SceneSelect.instance.SinglePlayer();
     }
 
-    public void RotateNews()
+    public void Refresh()
     {
-        database.Download();
-        database.SendNewsAndVersion(this);
+        StartPullInfo("News1");
+        StartPullInfo("News2");
+        StartPullInfo("Version");
+        StartPullInfo(FormatForDatabase(SaveLoad.instance.playerName));
+    }
+
+    public void StartPullInfo(string infoName)
+    {
+        StartCoroutine(PullInfoRoutine(infoName));
+    }
+
+    public IEnumerator PullInfoRoutine(string infoName)
+    {
+        WWW www = new WWW(Database.instance.webURL + Database.instance.privateCode + "/pipe-get/" + WWW.EscapeURL(infoName));
+        yield return www;
+
+        if (string.IsNullOrEmpty(www.error))
+        {
+            print(www.text);
+
+            if (www.text == "")
+            {
+                if(infoName != "News1" && infoName != "News2" && infoName != "Version")
+                    Database.AddNewRow(saveLoad.playerName, saveLoad.playerRP, 0, SystemInfo.deviceUniqueIdentifier);
+            }
+            else
+                PullInfoFinal(www.text, infoName);
+        }
+        else
+        {
+            print("Error pulling info " + www.error);
+        }
+    }
+
+    public void PullInfoFinal(string textStream, string infoName)
+    {
+        lobbyController.quickStartButton.GetComponent<Button>().interactable = true;
+        donateButton.interactable = true;
+
+        string dataFormatNameOld = FormatForDatabase(SaveLoad.instance.playerName);
+
+        string[] entryInfo = textStream.Split(new char[] { '|' });
+
+        string usernameInfo = entryInfo[0];
+        int rpInfo = int.Parse(entryInfo[1]);
+        int extraInfo = int.Parse(entryInfo[2]);
+        string IDInfo = entryInfo[3];
+
+        Row row = new Row(usernameInfo, rpInfo, extraInfo, IDInfo);
+
+        if (infoName == "News1")
+        {
+            news1 = IDInfo;
+            if (!newsInitialized)
+            {
+                InvokeRepeating("RotateNews", 0, 10);
+                newsInitialized = true;
+            }
+        }
+        else if (infoName == "News2")
+            news2 = IDInfo;
+        else if (infoName == "Version")
+        {
+            currentVersion = IDInfo;
+            if (Application.version != currentVersion && !versionMsgDisplayed && checkVersion != null)
+                checkVersion.SetActive(true);
+        }
+        else
+        {
+            playerRP.text = "" + rpInfo;
+            SetTitle(rpInfo);
+            saveLoad.playerRP = rpInfo;
+            saveLoad.Save();
+        }
+    }
+
+    void RotateNews()
+    {
+        if (newsInt == 0)
+        {
+            news.text = news2;
+            newsInt = 1;
+        }
+        else
+        {
+            news.text = news1;
+            newsInt = 0;
+        }
     }
 
     private string FormatForDatabase(string username)
@@ -146,44 +236,4 @@ public class MainMenu : MonoBehaviour
         }
         return dataFormat;
     }
-
-    public void OnDownloadNews(Row[] rows)
-    {
-        lobbyController.quickStartButton.GetComponent<Button>().interactable = true;
-        donateButton.interactable = true;
-
-        bool userFound = false;
-
-        string dataFormatNameNew = FormatForDatabase(saveLoad.playerName);
-
-        for (int i = 0; i < rows.Length; i++)
-        {
-            if (dataFormatNameNew == rows[i].username)
-            {
-                playerRP.text = "" + rows[i].rp;
-                SetTitle(rows[i].rp);
-                saveLoad.playerRP = rows[i].rp;
-                saveLoad.Save();
-                userFound = true;
-            }
-        }
-
-        if(!userFound)
-            Database.AddNewRow(saveLoad.playerName, saveLoad.playerRP, 0, SystemInfo.deviceUniqueIdentifier);
-
-        if (Application.version != database.currentVersion && !versionMsgDisplayed && checkVersion != null)
-            checkVersion.SetActive(true);
-
-        if (newsInt == 0)
-        {
-            news.text = database.newsArr[1];
-            newsInt = 1;
-        }
-        else
-        {
-            news.text = database.newsArr[0];
-            newsInt = 0;
-        }
-    }
-
 }

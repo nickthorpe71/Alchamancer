@@ -458,14 +458,14 @@ MonoBehaviour:
     m_BestFit: 1
     m_MinSize: 20
     m_MaxSize: 125
-    m_Alignment: 3
+    m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.7
-  m_Text: "That's it!\n\nYou will learn much more on your path to becoming the most
-    powerful Alchamancer. \n\nEnjoy the journey!"
+  m_Text: "That's it!\n\nYou will learn much more on your path to becoming the ultimate
+    Alchamancer. \n\nEnjoy the journey!"
 --- !u!222 &119968129
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6850,7 +6850,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1415445999
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6979,8 +6979,8 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.7
-  m_Text: If we cast any white spells they will be half as strong as white is the
-    opposite element of black.
+  m_Text: Casting spells can change the color of the field. This can be used to strengthen
+    or weaken spells.
 --- !u!222 &1421056792
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -7622,16 +7622,11 @@ MonoBehaviour:
   nextButton: {fileID: 1832300942}
   finishButton: {fileID: 1898855064}
   slides:
-  - {fileID: 1415445998}
+  - {fileID: 1710998841}
+  - {fileID: 857836184}
   - {fileID: 215260328}
-  - {fileID: 1935987877}
-  - {fileID: 1900907171}
-  - {fileID: 1423173188}
   - {fileID: 1870691101}
-  - {fileID: 846953986}
-  - {fileID: 956295727}
-  - {fileID: 806151668}
-  - {fileID: 253883027}
+  - {fileID: 704598470}
   - {fileID: 662872483}
   - {fileID: 1175401925}
 --- !u!4 &1584484784
@@ -8420,7 +8415,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1710998842
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9174,8 +9169,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 0.7
-  m_Text: Spells have a variety of effects from dealing damage to aiding with movement.
-    "Reap" steals life from your opponent.
+  m_Text: Use mana to cast spells. Each spell has a different effect.
 --- !u!222 &1861866173
 CanvasRenderer:
   m_ObjectHideFlags: 0
