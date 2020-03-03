@@ -2,6 +2,9 @@
 using UnityEngine.UI;
 using System.Collections;
 
+/// <summary>
+/// Makes an image fade out over a specified amount of seconds
+/// </summary>
 public class FadeInOut : MonoBehaviour
 {
     private Text text;

@@ -6,25 +6,31 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using UnityEngine.UI;
 
+/// <summary>
+/// Main script for saving and loading data locally
+/// </summary>
 public class SaveLoad : MonoBehaviour
 {
     public static SaveLoad instance;
 
-    public int playerRP;
-    public string playerName;
-    public int characterSkin;
-    [HideInInspector] public int numOfAvailableSkins = 14;
-    public Dictionary<int, bool> skinAvailability = new Dictionary<int, bool>();
-    public bool doneTutorial;
+    //** Saved Variables **\\
+    public int playerRP; //Record of users Rank Points
+    public string playerName; //Record of players username
+    public int characterSkin; //Record of which skin the player has selected
+    [HideInInspector] public int numOfAvailableSkins = 14; //Number of total available skins
+    public Dictionary<int, bool> skinAvailability = new Dictionary<int, bool>(); //A dictionary that determines whether the skin is available to this user
+    public bool doneTutorial; //Whether the user has gone through the initial tutorial
 
-    public float sfxVolume = 1;
-    public float musicVolume = 1;
+    public float sfxVolume = 1; //Saved setting of the SFX volume
+    public float musicVolume = 1; //Saves setting of music volume
 
-    public int otherPlayerRP;
-    public string otherPlayerName;
-    public bool onlineMatch;
 
-    public bool tournamentHost;
+    //** Temporary Variables **\\
+    public int otherPlayerRP; //After a match other players Rank Points are stored here temporarily
+    public string otherPlayerName; //After a match other players Username are stored here temporarily
+    public bool onlineMatch; //Whether match last player was online or not
+
+    public bool tournamentHost; //Whether this user is hosting a tournament
 
     void Awake()
     {
@@ -60,6 +66,9 @@ public class SaveLoad : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Initializez skins dictionary to correct size
+    /// </summary>
     private void InitializeSkins()
     {
         for (int i = 0; i < numOfAvailableSkins; i++)
@@ -69,6 +78,9 @@ public class SaveLoad : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function for saving data locally
+    /// </summary>
     public void Save()
     {
         BinaryFormatter bf = new BinaryFormatter();
@@ -90,6 +102,9 @@ public class SaveLoad : MonoBehaviour
         file.Close();
     }
 
+    /// <summary>
+    /// Function for saving loading data from persistant local data path
+    /// </summary>
     public void Load()
     {
         if (File.Exists(Application.persistentDataPath + "/playerInfo.dat"))
@@ -112,6 +127,9 @@ public class SaveLoad : MonoBehaviour
     }
 }
 
+/// <summary>
+/// All locally stored player data
+/// </summary>
 [Serializable]
 class PlayerData
 {

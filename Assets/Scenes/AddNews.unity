@@ -4298,6 +4298,8 @@ MonoBehaviour:
   news2Obj: {fileID: 1904558729}
   resetMenu: {fileID: 893872996}
   amountOfExp: {fileID: 389544329}
+  allUsersFile: {fileID: 4900000, guid: c4079ef7326c841afbf5e49535385caf, type: 3}
+  allUsers: []
 --- !u!1 &1612572274
 GameObject:
   m_ObjectHideFlags: 0
@@ -5236,9 +5238,6 @@ MonoBehaviour:
   publicCode: 5debdc7fb5622f683c282d00
   webURL: https://www.dreamlo.com/lb/
   downloadComplete: 0
-  newsArr: []
-  currentVersion: 
-  totalDonation: 
 --- !u!4 &1917839126
 Transform:
   m_ObjectHideFlags: 0

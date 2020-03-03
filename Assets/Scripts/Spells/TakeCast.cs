@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Script to fade in and out Take Cast effect
+/// </summary>
 public class TakeCast : MonoBehaviour
 {
-
     private void Start()
     {
         StartCoroutine(FadeInOut());

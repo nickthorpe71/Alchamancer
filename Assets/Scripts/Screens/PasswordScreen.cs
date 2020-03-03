@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Main script for Code Scene which is primarily used to get to add news scene
+/// </summary>
 public class PasswordScreen : MonoBehaviour
 {
     [SerializeField]
@@ -24,6 +27,9 @@ public class PasswordScreen : MonoBehaviour
         SoundManager.instance.musicSource.Play();
     }
 
+    /// <summary>
+    /// Function that is run by clicking the } button
+    /// </summary>
     public void OnClickEnterCode()
     {
         if(enteredCode.text == "aIAlive = true;")
@@ -65,6 +71,11 @@ public class PasswordScreen : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Displays the input string on screen
+    /// </summary>
+    /// <param name="messageText"></param>
+    /// <returns></returns>
     public IEnumerator DisplayMessage(string messageText)
     {
         message.GetComponent<Text>().text = messageText;

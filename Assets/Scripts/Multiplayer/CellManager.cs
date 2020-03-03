@@ -5,13 +5,18 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Multiplayer - Stores all objects on the grid with masterGrid dictinoary and handles replacing objects with Replace() and SpawnRandom() functions
+/// </summary>
 public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
 {
     public static CellManager instance;
 
-    [Header("Elements")]
-    public Dictionary<Vector3, GameObject> masterGrid = new Dictionary<Vector3, GameObject>();
+    [Header("Grid")]
+    public Dictionary<Vector3, GameObject> masterGrid = new Dictionary<Vector3, GameObject>(); //holds all all game objects in the grid sorted by their position in the grid
     public string startString;
+    //Currently all matches are played on a standardized set of elements instead of a randomizes one
+    //This standardized set is called realString which replaced startString
     private string realString = "4,3,6,2,6,3,4,5,2,7,3,7,2,5,7,6,5,4,5,6,7,1,1,1,8,1,1,1,2,3,4,5,4,3,2,4,7,2,6,2,7,4,5,6,3,7,3,6,5";
     public GameObject[] startMaterials;
     private int startMatInt = 0;
@@ -63,6 +68,9 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
         FillByCode();
     }
 
+    /// <summary>
+    /// Spawns a random element on the grid in place of dirt(empty)
+    /// </summary>
     public void SpawnRandom()
     {
         for (int i = 0; i < 100; i++)
@@ -80,6 +88,9 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
         }
     }
 
+    /// <summary>
+    /// Checks if the grid has no more elemets and if so replenishes them
+    /// </summary>
     public void CheckIfTapped()
     {
         bool tapped = true;
@@ -103,9 +114,25 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
         }
 
         if (tapped)
-            base.photonView.RPC("RPC_FillByCode", RpcTarget.All);
+            base.photonView.RPC("RPC_FillByCode", RpcTarget.All); //Sends randomized string to the other player
     }
 
+    /// <summary>
+    /// Receives randomized string from other player
+    /// </summary>
+    /// <param name="LevelString"></param>
+    [PunRPC]
+    private void RPC_FillByCode()
+    {
+        FillByCode();
+    }
+
+    /// <summary>
+    /// Remplaces the game object in the pos(position) with the provided replacement object and passes this to other players
+    /// to keep the grid consistant to all players
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="replacement"></param>
     public void Replace(Vector3 pos, GameObject replacement)
     {
         GameObject old = masterGrid[pos];
@@ -120,6 +147,11 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
         base.photonView.RPC("RPC_OtherReplace", RpcTarget.OthersBuffered, pos, replaceString);
     }
 
+    /// <summary>
+    /// Received replacement info from other players
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="replaceString"></param>
     [PunRPC]
     private void RPC_OtherReplace(Vector3 pos, string replaceString)
     {
@@ -146,9 +178,12 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
         DestroyImmediate(old, true);
     }
 
+    /// <summary>
+    /// Fill the masterGrid using the provided realString (use startString to randomize te field)
+    /// </summary>
     public void FillByCode()
     {
-        //create array for string
+        //create a temporary array of strings
         string[] temp;
         //fill the array with component from data string by spltting at commas
         temp = startString.Split(',');
@@ -220,6 +255,11 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
         SceneManager.sceneLoaded -= OnSceneFinishedLoading;
     }
 
+    /// <summary>
+    /// Creates the networked player objects when the scene has finished loading
+    /// </summary>
+    /// <param name="scene"></param>
+    /// <param name="mode"></param>
     void OnSceneFinishedLoading(Scene scene, LoadSceneMode mode)
     {
         Carry.instance.currentScene = scene.buildIndex;
@@ -229,20 +269,14 @@ public class CellManager : MonoBehaviourPunCallbacks, IInRoomCallbacks
             if (Carry.instance.currentScene == Carry.instance.levelScene)
             {
                 PhotonNetwork.Instantiate("NetworkPlayer", new Vector2(0, 0), Quaternion.identity);
-
-                /*if(PhotonNetwork.IsMasterClient)
-                    base.photonView.RPC("RPC_PlayerJoined", RpcTarget.Others, Carry.instance.levelString);*/
             }
         }
     }
 
-    [PunRPC]
-    private void RPC_FillByCode()
-    {
-        FillByCode();
-    }
-
-    //This receives the RPC
+    /// <summary>
+    /// Receives randomized string from other player
+    /// </summary>
+    /// <param name="LevelString"></param>
     [PunRPC]
     private void RPC_PlayerJoined(string LevelString)
     {

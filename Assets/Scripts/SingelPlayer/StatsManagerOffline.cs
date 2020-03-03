@@ -4,15 +4,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 
+/// <summary>
+/// Singleplayer Version - Handles both players Attack, Defense and HP
+/// </summary>
 public class StatsManagerOffline : MonoBehaviourPunCallbacks
 {
     
     [Header("General")]
-    public static StatsManagerOffline instance;
+    public static StatsManagerOffline instance; //Allows this script to be easily accessable from other scripts
     public SpellCasterOffline spellCaster;
     private GameManagerOffline gameManager;
     private SaveLoad saveLoad;
 
+    //UI display elements for human player
     [Header("MyStats")]
     public Text myName;
     public Text myRP;
@@ -27,6 +31,7 @@ public class StatsManagerOffline : MonoBehaviourPunCallbacks
     public GameObject myBrnObj;
     public bool myCounter;
 
+    //UI display elements for AI player
     [Header("TheirStats")]
     public Text theirName;
     public Text theirRP;
@@ -49,7 +54,8 @@ public class StatsManagerOffline : MonoBehaviourPunCallbacks
         gameManager = GameManagerOffline.instance;
         saveLoad = SaveLoad.instance;
 
-		myHP = myHPMax;
+        //Populate values in UI fields for human player
+        myHP = myHPMax;
 		theirHP = theirHPMax;
 
         myBar.MaxValue = myHPMax;
@@ -60,17 +66,16 @@ public class StatsManagerOffline : MonoBehaviourPunCallbacks
         myAttkText.text = myAttack.ToString();
         myDefText.text = myDefense.ToString();
 
-        SetNamesAndLevels();
-
-    }
-
-    void SetNamesAndLevels()
-    {
         myName.text = saveLoad.playerName;
         myRP.text = "RP " + saveLoad.playerRP.ToString();
+
     }
 
-    //Health Mods
+    /// <summary>
+    /// Used to alter the health of the human player and checks if there is a counter to reverse the damage - amount can be positive or negative
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="psnOrBurn"></param>
     public void MyHealth(int amount, bool psnOrBrn)
 	{
         if (myCounter && CalculateAmount(amount, myHP, myHPMax) < 0 && !psnOrBrn)
@@ -90,6 +95,11 @@ public class StatsManagerOffline : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Used to alter the health of the AI player and checks if there is a counter to reverse the damage - amount can be positive or negative
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="psnOrBurn"></param>
     public void TheirHealth(int amount, bool psnOrBrn)
     {
         if (theirCounter && CalculateAmount(amount, myHP, myHPMax) < 0 && !psnOrBrn)
@@ -109,6 +119,13 @@ public class StatsManagerOffline : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Takes in the amount that health should be altered by and makes sure health does not go above max health
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="currentHP"></param>
+    /// <param name="maxHP"></param>
+    /// <returns></returns>
     int CalculateAmount(int amount, int currentHP, int maxHP)
     {
         if (amount > 0)
@@ -131,17 +148,31 @@ public class StatsManagerOffline : MonoBehaviourPunCallbacks
 
     }
 
-    //Other Stat Mods
+    /// <summary>
+    /// Used to start a change of a "stat" of the human player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     public void MyStat(string stat, int amount)
     {
         MyStatAdjust(stat, amount);
     }
 
+    /// <summary>
+    /// Used to start a change of a "stat" of the AI player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     public void TheirStat(string stat, int amount)
     {
         TheirStatAdjust(stat, amount);
     }
 
+    /// <summary>
+    /// Alters a "stat" of the AI player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     private void TheirStatAdjust(string stat, int amount)
     {
         if (amount < 0)
@@ -178,6 +209,11 @@ public class StatsManagerOffline : MonoBehaviourPunCallbacks
             gameManager.DisplayMessage(theirName.text + "'s " + stat + " raised by " + amount);
     }
 
+    /// <summary>
+    /// Alters a "stat" of the human player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     private void MyStatAdjust(string stat, int amount)
     {
         if (amount < 0)

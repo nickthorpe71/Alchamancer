@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Creates a randomized mask color and particle effect for a Gheist
+/// </summary>
 public class GeistCreator : MonoBehaviour
 {
     private ParticleSystem particleSystem;

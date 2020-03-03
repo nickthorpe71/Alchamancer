@@ -5,21 +5,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 
+/// <summary>
+/// Script that allows player to change their username
+/// </summary>
 public class ChangeName : MonoBehaviourPunCallbacks
 {
     [SerializeField]
-    private Text newName;
+    private Text newName; //fieled for new name to be typed in
     [SerializeField]
-    private Text currentName;
+    private Text currentName; //field to display current name
 
     public bool isNewGame;
     public NewProfileScreen newScreen;
 
+    //List of all bad words
     List<string> badWords;
     [SerializeField] TextAsset badWordsFile;
 
     public Database database;
 
+    //UI images to display if the name was accepted or not
     public GameObject savedIndicator;
     public GameObject notSavedIndicator;
 
@@ -39,7 +44,11 @@ public class ChangeName : MonoBehaviourPunCallbacks
         database = Database.instance;
     }
 
-    //subs out spaces for + before removing row from database
+    /// <summary>
+    /// Subs out spaces for + before removing row from database
+    /// </summary>
+    /// <param name="username"></param>
+    /// <returns></returns>
     private string FormatForDatabase(string username)
     {
         string dataFormat = "";
@@ -54,11 +63,18 @@ public class ChangeName : MonoBehaviourPunCallbacks
         return dataFormat;
     }
 
+    /// <summary>
+    /// Starts the ChangeNameRoutine
+    /// </summary>
     public void OnClickChangeName()
     {
         StartCoroutine(ChangeNameRoutine());
     }
 
+    /// <summary>
+    /// Checks the databse to see if the username entered exists and will either tell the player this name is taken or allow them to use it
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator ChangeNameRoutine()
     {
         string dataFormatNameOld = FormatForDatabase(SaveLoad.instance.playerName);
@@ -74,10 +90,10 @@ public class ChangeName : MonoBehaviourPunCallbacks
             {
                 WWW www2 = new WWW(Database.instance.webURL + Database.instance.privateCode + "/pipe-get/" + WWW.EscapeURL(dataFormatNameOld));
                 yield return www2;
-                ChangeNameFinal(www2.text, true);
+                ChangeNameFinal(www2.text, true); //True means the name is available
             }
             else
-                ChangeNameFinal(www.text, false);
+                ChangeNameFinal(www.text, false); //False means the name is not available
         }
         else
         {
@@ -85,16 +101,21 @@ public class ChangeName : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Replaces players old name in database with new name - also checks that the name is not a bad word
+    /// </summary>
+    /// <param name="textStream"></param>
+    /// <param name="isAvailable"></param>
     public void ChangeNameFinal(string textStream, bool isAvailable)
     {
-        bool isBadWord = badWords.Any(newName.text.ToLower().Contains);
+        bool isBadWord = badWords.Any(newName.text.ToLower().Contains); //Check if new name is a bad word
 
         string dataFormatNameOld = FormatForDatabase(SaveLoad.instance.playerName);
         string dataFormatNameNew = FormatForDatabase(newName.text);
 
         if (isAvailable)
         {
-            string[] entryInfo = textStream.Split(new char[] { '|' });
+            string[] entryInfo = textStream.Split(new char[] { '|' }); //Parse old name data form database and store
 
             string usernameInfo = entryInfo[0];
             int rpInfo = int.Parse(entryInfo[1]);
@@ -132,11 +153,12 @@ public class ChangeName : MonoBehaviourPunCallbacks
 
                         if (!isNewGame)
                         {
-                            Database.RemoveRow(dataFormatNameOld);
+                            Database.RemoveRow(dataFormatNameOld); //Remove old username from database
                         }
 
-                        Database.AddNewRow(newName.text, rp, row.extra, SystemInfo.deviceUniqueIdentifier);
+                        Database.AddNewRow(newName.text, rp, row.extra, SystemInfo.deviceUniqueIdentifier); //Add new username to database
                         currentName.text = newName.text;
+                        //Also save new username locally
                         SaveLoad.instance.playerName = newName.text;
                         SaveLoad.instance.Save();
 
@@ -171,6 +193,9 @@ public class ChangeName : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Activates and deactivates save successfull UI indicator 
+    /// </summary>
     public IEnumerator SavedNameRoutine()
     {
         savedIndicator.SetActive(true);
@@ -178,6 +203,9 @@ public class ChangeName : MonoBehaviourPunCallbacks
         savedIndicator.SetActive(false);
     }
 
+    /// <summary>
+    /// Activates and deactivates save unsuccessfull UI indicator 
+    /// </summary>
     public IEnumerator NotSavedNameRoutine()
     {
         notSavedIndicator.SetActive(true);

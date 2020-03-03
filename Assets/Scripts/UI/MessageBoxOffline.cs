@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Single Player Version - Allows the user to interract with the dialogue box
+/// </summary>
 public class MessageBoxOffline : MonoBehaviour
 {
     public GameObject tapToClose;
@@ -19,6 +22,5 @@ public class MessageBoxOffline : MonoBehaviour
     public void DestroyMe()
     {
         GameManagerOffline.instance.CloseMessage();
-        //Destroy(this.gameObject);
     }
 }

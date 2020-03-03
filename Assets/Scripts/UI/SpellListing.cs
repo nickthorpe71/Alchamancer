@@ -4,8 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Realtime;
 
+/// <summary>
+/// Multiplayer Version - Sets up UI display or each spell listing
+/// </summary>
 public class SpellListing : MonoBehaviour
 {
+    //All possible background colors
     public Color neutral;
     public Color blue;
     public Color green;
@@ -32,6 +36,7 @@ public class SpellListing : MonoBehaviour
     {
         gameManager = GameManager.instance;
 
+        //initialize and populate allColors
         allColors.Add("Neutral", neutral);
         allColors.Add("Blue", blue);
         allColors.Add("Green", green);
@@ -40,6 +45,7 @@ public class SpellListing : MonoBehaviour
         allColors.Add("White", white);
         allColors.Add("Black", black);
 
+        //Set positions of mana cost display slots
         if (active)
         {
             slotLocations[0] = new Vector2(-200, 27);
@@ -63,6 +69,9 @@ public class SpellListing : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Sends info fo spell caster when the player clicks a spell listing
+    /// </summary>
     public void Click()
     {
         if(gameManager.myTurn)
@@ -73,6 +82,9 @@ public class SpellListing : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets tooltip to be active or inactive depending on current state
+    /// </summary>
     public void Info()
     {
         if (active)
@@ -87,9 +99,12 @@ public class SpellListing : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the cost of the spell for this listing and determines whether the player has enough mana to cast it
+    /// </summary>
     public void CheckCost()
     {
-        //this is currently acting as start becuase it is called before the object becomes active
+        //this acts as start becuase it is called before the object becomes active
         infoYesButton = GameManager.instance.infoYesButton;
         Terraform terraScript = GameManager.instance.myPlayer.GetComponentInChildren<Terraform>();
 
@@ -108,16 +123,17 @@ public class SpellListing : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Set background UI color
+    /// </summary>
     private void SetColor()
     {
         BG.color = allColors[spell.color];
-
-        /*if (spell.color == "Black")
-        {
-            spellName.color = allColors["Neutral"];
-        }*/
     }
 
+    /// <summary>
+    /// Use cost of spell to set mana cost images
+    /// </summary>
     private void SetCost()
     {
         int blueTemp = spell.blueCost;
@@ -162,6 +178,11 @@ public class SpellListing : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Populates mana cost images
+    /// </summary>
+    /// <param name="manaImage"></param>
+    /// <param name="slotPos"></param>
     private void InstantiateMana(GameObject manaImage, Vector2 slotPos)
     {
         GameObject temp = Instantiate(manaImage, slotPos, Quaternion.identity);

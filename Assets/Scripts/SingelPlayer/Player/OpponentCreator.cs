@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Creates name, stats and skin for AI player
+/// </summary>
 public class OpponentCreator : MonoBehaviour
 {
-
     public string name;
-    public int rp;
-    public int skin = 0;
+    public int rp; //Rank Points
+    public int skin = 0; 
 
-    //vowels = ['a', 'e', 'i', 'o', 'u']
-    //consonants = ['b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'x', 'y', 'z']
-
-    private List<char> nextLetters = new List<char>();
-    private Dictionary<char, List<char>> nextLetterLists = new Dictionary<char, List<char>>();
+    private List<char> nextLetters = new List<char>(); //List of letters that can be used after current letter
+    private Dictionary<char, List<char>> nextLetterLists = new Dictionary<char, List<char>>(); //Dictionary ehere the key is a letter and the value is a list of all possible letters that could follow
 
     private List<string> titles = new List<string>() {"the Hammer", "the Axe", "the Sword", "the Blade", "the Sharp", "the Jagged", "the Flayer", "the Slasher", "the Impaler", "the Hunter", "the Slayer", "the Mauler", "the Quick", "the Witch", "the Mad", "the Wraith", "the Shade", "the Dead", "the Unholy", "the Howler", "the Grim", "the Dark", "the Tainted", "the Unclean", "the Hungry", "the Cold", "the Wise", "the Just", "the Agile", "the Angelic", "the Blunt", "the Cowardly", "the Clever", "the Demonic", "the Drunk", "the King"};
     private List<string> prefixes = new List<string>() {"Gloom", "Gray", "Dire", "Black", "Shadow", "Haze", "Wind", "Storm", "Warp", "Night", "Moon", "Star", "Pit", "Fire", "Cold", "Sharp", "Ash", "Blade", "Steel", "Stone", "Rust", "Arcane", "Mold", "Arcane", "Blight", "Plague", "Rot", "Ooze", "Puke", "Snot", "Bile", "Blood", "Pulse", "Gut", "Gore", "Flesh", "Bone", "Spine", "Mind", "Spirit", "Soul", "Wrath", "Grief", "Foul", "Vile", "Sin", "Chaos", "Dread", "Doom", "Bane", "Death", "Viper", "Dragon", "Devil", "Iron", "Angel", "Demon", "Flame", "Rose", "Ice", "Light", "Dark", "Slate", "Shade", "Witch", "Secret", "Blue", "Red", "Green", "Yellow", "White", "Alex", "Vive", "Lylo", "Edward", "Grom", "Sin", "Jana"};
@@ -21,17 +20,18 @@ public class OpponentCreator : MonoBehaviour
 
     private void Awake()
     {
-        skin = Random.Range(0, SaveLoad.instance.numOfAvailableSkins + 1);
+        skin = Random.Range(0, SaveLoad.instance.numOfAvailableSkins + 1); //Randomly select a skin for AI
 
-        rp = Random.Range(950, 1010);
+        rp = Random.Range(950, 1010); //Select a random amount fo Rank Points for AI between selected range
 
-        if (skin == 13)
-        {
-            rp = Random.Range(1500,2300);
+        if (skin == 13) //Skin 13 is the Gheist skin 
+        { //If selected skin is a Gheist skin
+            rp = Random.Range(1500,2300); //Select a random amount fo Rank Points for AI between a higher selected range
 
-            int increaseMod = rp / 50;
+            int increaseMod = rp / 50; //Increase mod is used to buff stats of Gheist
 
-            StatsManagerOffline.instance.theirHPMax += increaseMod;
+            //Raise HP, Attack and Defense by increase mod
+            StatsManagerOffline.instance.theirHPMax += increaseMod; 
             StatsManagerOffline.instance.theirHP += increaseMod;
             StatsManagerOffline.instance.theirAttack += increaseMod + 5;
             StatsManagerOffline.instance.theirDefense += increaseMod + 5;
@@ -44,11 +44,15 @@ public class OpponentCreator : MonoBehaviour
 
         StructureName();
 
+        //Set name and RP for AI
         StatsManagerOffline.instance.theirName.text = name;
         StatsManagerOffline.instance.theirRP.text = "RP " + rp.ToString();
         GetComponent<PlayerControlOffline>().screenName = name;
     }
 
+    /// <summary>
+    /// Randomly selects a name structure for the AI
+    /// </summary>
     void StructureName()
     {
         int structInt = Random.Range(0, 5);
@@ -70,9 +74,12 @@ public class OpponentCreator : MonoBehaviour
         
 
         if (skin == 13)
-            name = "Geist " + BuildRandomName();
+            name = "Gheist " + BuildRandomName();
     }
 
+    /// <summary>
+    /// Builds a name with no preexisting words - built letter by letter with specified randomness so the name is readable but completely made up
+    /// </summary>
     string BuildRandomName()
     {
         char lastLetter = '1';
@@ -99,8 +106,14 @@ public class OpponentCreator : MonoBehaviour
         return _name;
     }
 
+    /// <summary>
+    /// List of all letters that could follow each letter of the alphabet
+    /// </summary>
     void InitializeLetterLists()
     {
+        //Some letters occur multiple times in a single list to increase their chance of being placed
+
+        //1 is used as the first letter in a name
         List<char> allLetters = new List<char>() {'b', 'c', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'v', 'y', 'z', 'a', 'e', 'i', 'o', 'u', 'b', 'c', 'd', 'f', 'g', 'h', 'l', 'm', 'n', 'p', 'r', 's', 't', 'a', 'e', 'o', 'u', 'b', 'c', 'd', 'f', 'g', 'h', 'l', 'm', 'n', 'p','r', 's', 't', 'a', 'e', 'o', 'u' };
         nextLetterLists.Add('1', allLetters);
 

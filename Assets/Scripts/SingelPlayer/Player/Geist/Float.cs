@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Whichever object this script is placed on will float up and down at specified amplitude and frequency
+/// </summary>
 public class Float : MonoBehaviour
 {
     public float amplitude;

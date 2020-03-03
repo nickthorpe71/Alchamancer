@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Handles searching for matches to play, canceling searches and calculating the amount of players online
+/// </summary>
 public class QuickStartLobbyController : MonoBehaviourPunCallbacks
 {
     public GameObject quickStartButton;
@@ -13,9 +16,9 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
     [SerializeField]
     private GameObject connectImage;
     [SerializeField]
-    private int RoomSize;
+    private int RoomSize; //How many players can be in a room
 
-    public Text playerCount;
+    public Text playerCount; //UI to display current amount of players online
 
     private Carry carry;
     private bool restartAIRoutine = true;
@@ -42,17 +45,27 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
         CalcOnlinePlayers();
     }
 
+    /// <summary>
+    /// Displays the current amount of online players
+    /// </summary>
     public void CalcOnlinePlayers()
     {
         playerCount.text = PhotonNetwork.CountOfPlayers.ToString();
     }
 
+    /// <summary>
+    /// Starts a routine that keeps trying to join matches
+    /// </summary>
     public void StartAIRoutine()
     {
         if (restartAIRoutine)
             StartCoroutine(AIRoutine());
     }
 
+    /// <summary>
+    /// Tries to join a match then waits for 3 seconds and cancels the search
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator AIRoutine()
     {
         if(PhotonNetwork.IsConnected && restartAIRoutine)
@@ -66,12 +79,18 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Once connected to the master Photon server turn off the image that says you are offline
+    /// </summary>
     public override void OnConnectedToMaster() 
     {
         PhotonNetwork.AutomaticallySyncScene = true;
         connectImage.SetActive(false);
     }
 
+    /// <summary>
+    /// Function that is run by "Find Match" button - Looks for an open match, if found it joins else it creates a new match
+    /// </summary>
     public void QuickStart()
     {
         roomController.isTournament = false;
@@ -92,11 +111,21 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
             PhotonNetwork.ConnectUsingSettings();
         }
     }
+
+    /// <summary>
+    /// This is run if we fail to join a room and in response creats a new room
+    /// </summary>
+    /// <param name="returnCode"></param>
+    /// <param name="message"></param>
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         Debug.Log("Failed to join a room");
         CreateRoom();
     }
+
+    /// <summary>
+    /// Function for creating a room
+    /// </summary>
     void CreateRoom()
     {
         roomController.isTournament = false;
@@ -108,6 +137,9 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
         Debug.Log(randomRoomNumber);
     }
 
+    /// <summary>
+    /// Function for creating a tournamnet room - If you create the room you will only be spectating
+    /// </summary>
     public void CreateTournament()
     {
         roomController.isTournament = true;
@@ -120,6 +152,9 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
         PhotonNetwork.CreateRoom("Tournament" , roomOps);
     }
 
+    /// <summary>
+    /// Attempts to join a room with name "Tournament" and will allow player joining to play
+    /// </summary>
     public void JoinTournament()
     {
         roomController.isTournament = true;
@@ -140,13 +175,22 @@ public class QuickStartLobbyController : MonoBehaviourPunCallbacks
             PhotonNetwork.ConnectUsingSettings();
         }
 
-}
+    }
 
+    /// <summary>
+    /// If we fail to create a room then this function attempts to create another
+    /// </summary>
+    /// <param name="returnCode"></param>
+    /// <param name="message"></param>
     public override void OnCreateRoomFailed(short returnCode, string message)
     {
         Debug.Log("Failed to create room... trying again");
         CreateRoom();
     }
+
+    /// <summary>
+    /// Function attached to the cancel button - Cancels room search, room creation and disconnects from the server - After disconnect NetworkController will atomatically try to reconnect
+    /// </summary>
     public void QuickCancel()
     {
         SaveLoad.instance.tournamentHost = false;

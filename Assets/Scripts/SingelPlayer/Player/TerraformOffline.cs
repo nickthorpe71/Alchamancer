@@ -5,11 +5,12 @@ using UnityEngine.UI;
 
 public class TerraformOffline : MonoBehaviour
 {
-    private GameManagerOffline gameManager;
+    private GameManagerOffline gameManager; 
     private CellManagerOffline cellManager;
     private SoundManager soundManager;
 
     [Header("Elements")]
+    //UI Display count for all elements
     public int waterCount;
     public int plantCount;
     public int fireCount;
@@ -17,17 +18,18 @@ public class TerraformOffline : MonoBehaviour
     public int lifeCount;
     public int deathCount;
     public GameObject takeCast;
+    //Prefabs for all elements
     public GameObject dirt, water, plant, fire, rock, life, death;
 
     [Header("Player")]
     private PlayerControlOffline playerCon;
     public GameObject target;
-    public bool canTake;
-    public float castSpeed = 0.4f;
+    public bool canTake; //Whether this player can collect elements
+    public float castSpeed = 0.4f; //Time before player can collect again
     private GameObject temp;
     private Animator animator;
-    public bool isAI;
-    public SpellSO antidoteSpell;
+    public bool isAI; //Whether this script is being controled by AI or not
+    public SpellSO antidoteSpell; 
 
     [Header("Energy and Mana")]
     public int energy = 4;
@@ -71,6 +73,9 @@ public class TerraformOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Uses the masterGrid in CellManager to determine what is the target position
+    /// </summary>
     public void DetermineTarget()
     {
         Vector3 relativePos = transform.position;
@@ -85,6 +90,10 @@ public class TerraformOffline : MonoBehaviour
             target = cellManager.masterGrid[new Vector3(relativePos.x + 1, relativePos.y, relativePos.z)];
     }
 
+    /// <summary>
+    /// Main function for collecting elements - Uses bool eatMana to see if we are collecting or eating the target element
+    /// </summary>
+    /// <param name="eatMana"></param>
     public void Take(bool eatMana)
     {
         DetermineTarget();
@@ -186,6 +195,10 @@ public class TerraformOffline : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Grouping of things that need to be done after the Take function is run
+    /// </summary>
+    /// <param name="eatMana"></param>
     public void PostTake(bool eatMana)
     {
         soundManager.PlaySingle(takeSound, 0.8f);
@@ -209,6 +222,7 @@ public class TerraformOffline : MonoBehaviour
 
         Quaternion castRotation = Quaternion.Euler(0, 0, 0);
 
+        //Determine rotation of post take animation
         temp = Instantiate(takeCast, target.transform.position, Quaternion.identity);
         if (playerCon.facingBack)
             castRotation = Quaternion.Euler(90, 0, 0);
@@ -222,6 +236,9 @@ public class TerraformOffline : MonoBehaviour
         temp.transform.GetChild(0).transform.rotation = castRotation;
     }
 
+    /// <summary>
+    /// Uses direction bools to decide which cast animation to play
+    /// </summary>
     public void Cast()
     {
         if (playerCon.facingFront)
@@ -235,6 +252,10 @@ public class TerraformOffline : MonoBehaviour
         StartCoroutine(CastRoutine());
     }
 
+    /// <summary>
+    /// Uses castSpeed to delay the player after they collect an element
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator CastRoutine()
     {
         playerCon.canMove = false;
@@ -243,32 +264,45 @@ public class TerraformOffline : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Plays cast animation facing forward
+    /// </summary>
     public void CastFront()
     {
         ResetAnim();
-        string trigger = "CastFront";
-        animator.SetTrigger(trigger);
+        animator.SetTrigger("CastFront");
     }
 
+    /// <summary>
+    /// Plays cast animation facing backward
+    /// </summary>
     public void CastBack()
     {
         ResetAnim();
-        string trigger = "CastBack";
-        animator.SetTrigger(trigger);
+        animator.SetTrigger("CastBack");
     }
+
+    /// <summary>
+    /// Plays cast animation facing left
+    /// </summary>
     public void CastLeft()
     {
         ResetAnim();
-        string trigger = "CastLeft";
-        animator.SetTrigger(trigger);
+        animator.SetTrigger("CastLeft");
     }
+
+    /// <summary>
+    /// Plays cast animation facing right
+    /// </summary>
     public void CastRight()
     {
         ResetAnim();
-        string trigger = "CastRight";
-        animator.SetTrigger(trigger);
+        animator.SetTrigger("CastRight");
     }
 
+    /// <summary>
+    /// Resets cast animation triggers
+    /// </summary>
     public void ResetAnim()
     {
         animator.ResetTrigger("CastFront");
@@ -277,6 +311,9 @@ public class TerraformOffline : MonoBehaviour
         animator.ResetTrigger("CastRight");
     }
 
+    /// <summary>
+    /// Use after adjusting energy to make sure energy display images are reflecting current energy
+    /// </summary>
     public void CheckEnergy()
     {
         
@@ -302,6 +339,9 @@ public class TerraformOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Use after adjusting mana to make sure mana display images are reflecting current mana
+    /// </summary>
     public void CheckMana()
     {
 

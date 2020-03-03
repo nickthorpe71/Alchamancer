@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Allows user to interract with the pause menu
+/// </summary>
 public class PauseMenu : MonoBehaviour
 {
     public GameObject pauseMenu;
@@ -17,6 +20,9 @@ public class PauseMenu : MonoBehaviour
         soundManager = SoundManager.instance;
     }
 
+    /// <summary>
+    /// Opens or closes pause menu depending on it's current state
+    /// </summary>
     public void ClickPauseMenu()
     {
         if (pauseMenuOpen)
@@ -33,6 +39,9 @@ public class PauseMenu : MonoBehaviour
         soundManager.PlayButtonClick();
     }
 
+    /// <summary>
+    /// Opens or closes settings menu depending on it's current state
+    /// </summary>
     public void ClickSettingsMenu()
     {
         if (settingsMenuOpen)

@@ -4,11 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 
+/// <summary>
+/// Multiplayer Version - Tracks field color and changes environments
+/// </summary>
 public class AreaColorManager : MonoBehaviourPunCallbacks
 {
-    public static AreaColorManager instance;
+    public static AreaColorManager instance; //Allows easy access to this script from other scripts in the scene
 
-    public GameObject[] environments;
+    public GameObject[] environments; //Array to hold all environment game objects
 
     public Color neutral;
     public Color blue;
@@ -20,15 +23,17 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
 
     [HideInInspector] public string currentAreaColor = "Neutral";
 
+    //Images that display field colors
     public Image MainColor;
     public Image orb1;
     public Image orb2;
 
-    private string[] currentColors = new string[3];
-    private Dictionary<int, string> allColorStrings = new Dictionary<int, string>();
-    private Dictionary<string, Color> allColors = new Dictionary<string, Color>();
 
-    private bool firstTurn = true;
+    private string[] currentColors = new string[3]; //Array of which colors are active
+    private Dictionary<int, string> allColorStrings = new Dictionary<int, string>(); //Dictionary of all possible color names - Keyed by int
+    private Dictionary<string, Color> allColors = new Dictionary<string, Color>(); //Dictionary of all collors - Keyed by string name
+
+    private bool firstTurn = true; //bool to stop the field from changing color on the first turn
 
     private void Awake()
     {
@@ -37,6 +42,7 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
+        //Populate allColorStrings dictionary
         allColorStrings.Add(0, "Blue");
         allColorStrings.Add(1, "Green");
         allColorStrings.Add(2, "Red");
@@ -44,6 +50,7 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
         allColorStrings.Add(4, "White");
         allColorStrings.Add(5, "Black");
 
+        //Populate allColors dictionary
         allColors.Add("Neutral", neutral);
         allColors.Add("Blue", blue);
         allColors.Add("Green", green);
@@ -52,13 +59,18 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
         allColors.Add("White", white);
         allColors.Add("Black", black);
 
+        //This makes sure only one player rendomizes the field colors initially
         if (PhotonNetwork.IsMasterClient)
             RandomizeColors();
 
+        //Set the field color to neutral at start of the match
         MainColor.color = neutral;
         currentAreaColor = "Neutral";
     }
 
+    /// <summary>
+    /// Randomizes the colors on the field
+    /// </summary>
     private void RandomizeColors()
     {
         for (int i = 0; i < 2; i++)
@@ -69,9 +81,15 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
 
         UpdateColorImages();
 
+        //Passes randomized colors to other players
         base.photonView.RPC("RPC_RandomizeColors", RpcTarget.Others, currentColors[0], currentColors[1]);
     }
 
+    /// <summary>
+    /// Receives colors from other players
+    /// </summary>
+    /// <param name="color0"></param>
+    /// <param name="color1"></param>
     [PunRPC]
     private void RPC_RandomizeColors(string color0, string color1)
     {
@@ -81,11 +99,19 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
         UpdateColorImages();
     }
 
+    /// <summary>
+    /// Moves the colors right allowing a new color to be added
+    /// </summary>
+    /// <param name="newColor"></param>
     public void Cycle(string newColor)
     {
         base.photonView.RPC("RPC_Cycle", RpcTarget.All, newColor);
     }
 
+    /// <summary>
+    /// Reveives new color
+    /// </summary>
+    /// <param name="newColor"></param>
     [PunRPC]
     public void RPC_Cycle(string newColor)
     {
@@ -95,6 +121,9 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
         UpdateColorImages();
     }
 
+    /// <summary>
+    /// Updates the display images with the currenyColor array
+    /// </summary>
     private void UpdateColorImages()
     {
         orb1.color = allColors[currentColors[0]];
@@ -103,6 +132,9 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
         CheckMainColor();
     }
 
+    /// <summary>
+    /// Checks to see if the two sub colors match and if so changes the field color to that color
+    /// </summary>
     private void CheckMainColor()
     {
         string tempColor = currentColors[0];
@@ -154,6 +186,9 @@ public class AreaColorManager : MonoBehaviourPunCallbacks
         firstTurn = false;
     }
 
+    /// <summary>
+    /// Deactivates all environment Game Objects
+    /// </summary>
     void EnvironmentsOff()
     {
         for (int i = 0; i < environments.Length; i++)

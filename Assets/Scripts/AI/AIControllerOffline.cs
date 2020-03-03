@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Controls AI in single player games
+/// </summary>
 public class AIControllerOffline : MonoBehaviour
 {
+    //All external scripts that need to be referenced
     private PlayerControlOffline playerControl;
     private TerraformOffline terraScript;
-
     private GameManagerOffline gameManager;
     private CellManagerOffline cellManager;
     private SpellCasterOffline spellCaster;
@@ -14,13 +17,18 @@ public class AIControllerOffline : MonoBehaviour
 
     public bool moveComplete = true;
 
+    //Set the base time between the AI's actions
     private float timeBetweenActions = 0.25f;
 
+    //List of all spells
     public Dictionary<string, SpellSO> spellDict = new Dictionary<string, SpellSO>();
+    //List of spells that AI has enough mana for
     public List<string> castableSpells = new List<string>();
 
+    
     void Start()
     {
+        //Set all external script objects.
         gameManager = GameManagerOffline.instance;
         cellManager = CellManagerOffline.instance;
         spellCaster = cellManager.spellCaster;
@@ -30,12 +38,14 @@ public class AIControllerOffline : MonoBehaviour
 
         PopulateSpellDict();
 
+        //Initiate turn check function
         InvokeRepeating("CheckTurn", 1, 0.25f);
 
     }
 
     void PopulateSpellDict()
     {
+        //Populate a dictionary of spells using the spell list in spell caster script
         foreach (SpellSO spell in spellCaster.spellsStandard)
         {
             spellDict.Add(spell.spellName, spell);
@@ -44,37 +54,54 @@ public class AIControllerOffline : MonoBehaviour
 
     void CheckTurn()
     {
-        if (!gameManager.myTurn)
-            StartCoroutine(CheckTurnRoutine());
+        // Checks if it's the player's turn or AI's turn
+        //myTurn = true means non AI player's turn
+        //If not players turn then start the AI's turn
+        if (!gameManager.myTurn) 
+            StartCoroutine(MakeMovesRoutine());
         else
         {
+            //else stop all coroutines and reset moveComplete to true
             StopAllCoroutines();
             moveComplete = true;
         }
     }
 
-    public IEnumerator CheckTurnRoutine()
+    /// <summary>
+    /// Main function that decides whether to move around the board, collect mana, or cast spells
+    /// </summary>
+    public IEnumerator MakeMovesRoutine()
     {
         if (moveComplete)
         {
+            //Check if there is still energy to spend
             if (terraScript.energy <= 0)
             {
+                //If there is no energy try to cast
                 TryToCast(0);
                 yield return new WaitForSeconds(timeBetweenActions * 10);
+                //Take damage from poison and burn then end turn
                 playerControl.DoT();
                 gameManager.NextTurn();
             }
 
+            //If there is still energy then start a move
+            //A move could be movement around the board, collecting mana, or casting spells
             moveComplete = false;
 
+            //Run try cast with existing mana
+            //The parameter int determines the chance that the AI will cast using their current mana
+            //The higher the number the lower the chance
             TryToCast(3);
             yield return new WaitForSeconds(timeBetweenActions * 4);
 
+            //Create an array of strings to store which objects are around the AI player
             string[] surroundings = new string[4];
             surroundings = GetSurroundings();
 
             yield return new WaitForSeconds(timeBetweenActions);
 
+            
             if (ThereIsMana(surroundings))
             {
                 yield return new WaitForSeconds(timeBetweenActions);
@@ -104,6 +131,10 @@ public class AIControllerOffline : MonoBehaviour
             yield return new WaitForEndOfFrame();
     }
 
+    /// <summary>
+    /// Determines whether to cast a spell with existing mana or to save mana
+    /// </summary>
+    /// <param name="chance"></param>
     void TryToCast(int chance)
     {
         if(terraScript.currentMana == 8)
@@ -130,6 +161,9 @@ public class AIControllerOffline : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// The function that chooses which spell to cast after checking wheter the AI wants to use existing mana or save mana
+    /// </summary>
     void CastPostChecks()
     {
         CheckWhatsCastable();
@@ -194,113 +228,12 @@ public class AIControllerOffline : MonoBehaviour
         }
     }
 
-    #region Controls
-    void MoveLeft()
-    {
-        if(playerControl.facingLeft)
-        {
-            playerControl.MoveLeft();
-        }
-        else
-        {
-            playerControl.MoveLeft();
-            playerControl.MoveLeft();
-        }
 
-    }
-
-    void MoveRight()
-    {
-        if (playerControl.facingRight)
-        {
-            playerControl.MoveRight();
-        }
-        else
-        {
-            playerControl.MoveRight();
-            playerControl.MoveRight();
-        }
-    }
-
-    void MoveUp()
-    {
-        if (playerControl.facingBack)
-        {
-            playerControl.MoveUp();
-        }
-        else
-        {
-            playerControl.MoveUp();
-            playerControl.MoveUp();
-        }
-    }
-
-    void MoveDown()
-    {
-        if (playerControl.facingFront)
-        {
-            playerControl.MoveDown();
-        }
-        else
-        {
-            playerControl.MoveDown();
-            playerControl.MoveDown();
-        }
-    }
-
-    void CollectLeft()
-    {
-        if(playerControl.facingLeft)
-        {
-            terraScript.Take(false);
-        }
-        else
-        {
-            playerControl.MoveLeft();
-            terraScript.Take(false);
-        }
-    }
-
-    void CollectRight()
-    {
-        if (playerControl.facingRight)
-        {
-            terraScript.Take(false);
-        }
-        else
-        {
-            playerControl.MoveRight();
-            terraScript.Take(false);
-        }
-    }
-
-    void CollectUp()
-    {
-        if (playerControl.facingBack)
-        {
-            terraScript.Take(false);
-        }
-        else
-        {
-            playerControl.MoveUp();
-            terraScript.Take(false);
-        }
-    }
-
-    void CollectDown()
-    {
-        if (playerControl.facingFront)
-        {
-            terraScript.Take(false);
-        }
-        else
-        {
-            playerControl.MoveDown();
-            terraScript.Take(false);
-        }
-    }
-    #endregion
-
+    /// <summary>
+    /// Chooses a random tile to move to and uses current surroundings array
+    /// to determine which tiles available for movement
+    /// </summary>
+    /// <param name="surroundings"></param>
     private void RandomMove(string[] surroundings)
     {
         int temp = Random.Range(0, 4);
@@ -324,6 +257,10 @@ public class AIControllerOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Randomly chooses one of the mana surrounding the AI and collects it
+    /// </summary>
+    /// <param name="surroundings"></param>
     private void RandomCollect(string[] surroundings)
     {
         if (surroundings[0] != "Dirt(Clone)" && surroundings[0] != "Empty" && surroundings[0] != "DragonVein(Clone)")
@@ -336,6 +273,11 @@ public class AIControllerOffline : MonoBehaviour
             CollectLeft();
     }
 
+    /// <summary>
+    /// Takes in aray of current surroundings and determines whether there is mana
+    /// </summary>
+    /// <param name="surroundings"></param>
+    /// <returns></returns>
     private bool ThereIsMana(string[] surroundings)
     {
         foreach (string potential in surroundings)
@@ -349,6 +291,11 @@ public class AIControllerOffline : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Populates an array of 4 strings, each for a direction (up, down, left, right), with a string stating
+    /// what is on the immediate tile in that direction
+    /// </summary>
+    /// <returns></returns>
     public string[] GetSurroundings()
     {
         List<Vector3> directions = new List<Vector3>();
@@ -376,6 +323,9 @@ public class AIControllerOffline : MonoBehaviour
         return surroundings;
     }
 
+    /// <summary>
+    /// Clears castable spells list and uses current mana to determine what spells are castable
+    /// </summary>
     void CheckWhatsCastable()
     {
         castableSpells.Clear();
@@ -387,6 +337,11 @@ public class AIControllerOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Check the cost of the param spell to see if AI has enough mana for it. If so return true else return false.
+    /// </summary>
+    /// <param name="spell"></param>
+    /// <returns></returns>
     private bool CanAffordSpell(SpellSO spell)
     {
         if (terraScript.waterCount >= spell.blueCost && terraScript.plantCount >= spell.greenCost &&
@@ -400,4 +355,135 @@ public class AIControllerOffline : MonoBehaviour
             return false;
         }
     }
+
+    #region Controls
+    /// <summary>
+    /// Feeds into the playerControl script to move left
+    /// </summary>
+    void MoveLeft()
+    {
+        if (playerControl.facingLeft)
+        {
+            playerControl.MoveLeft();
+        }
+        else
+        {
+            playerControl.MoveLeft();
+            playerControl.MoveLeft();
+        }
+
+    }
+
+    /// <summary>
+    /// Feeds into the playerControl script to move right
+    /// </summary>
+    void MoveRight()
+    {
+        if (playerControl.facingRight)
+        {
+            playerControl.MoveRight();
+        }
+        else
+        {
+            playerControl.MoveRight();
+            playerControl.MoveRight();
+        }
+    }
+
+    /// <summary>
+    /// Feeds into the playerControl script to move up
+    /// </summary>
+    void MoveUp()
+    {
+        if (playerControl.facingBack)
+        {
+            playerControl.MoveUp();
+        }
+        else
+        {
+            playerControl.MoveUp();
+            playerControl.MoveUp();
+        }
+    }
+
+    /// <summary>
+    /// Feeds into the playerControl script to move down
+    /// </summary>
+    void MoveDown()
+    {
+        if (playerControl.facingFront)
+        {
+            playerControl.MoveDown();
+        }
+        else
+        {
+            playerControl.MoveDown();
+            playerControl.MoveDown();
+        }
+    }
+
+    /// <summary>
+    /// Feeds into the playerControl script to collect left
+    /// </summary>
+    void CollectLeft()
+    {
+        if (playerControl.facingLeft)
+        {
+            terraScript.Take(false);
+        }
+        else
+        {
+            playerControl.MoveLeft();
+            terraScript.Take(false);
+        }
+    }
+
+    /// <summary>
+    /// Feeds into the playerControl script to collect right
+    /// </summary>
+    void CollectRight()
+    {
+        if (playerControl.facingRight)
+        {
+            terraScript.Take(false);
+        }
+        else
+        {
+            playerControl.MoveRight();
+            terraScript.Take(false);
+        }
+    }
+
+    /// <summary>
+    /// Feeds into the playerControl script to collect up
+    /// </summary>
+    void CollectUp()
+    {
+        if (playerControl.facingBack)
+        {
+            terraScript.Take(false);
+        }
+        else
+        {
+            playerControl.MoveUp();
+            terraScript.Take(false);
+        }
+    }
+
+    /// <summary>
+    /// Feeds into the playerControl script to collect down
+    /// </summary>
+    void CollectDown()
+    {
+        if (playerControl.facingFront)
+        {
+            terraScript.Take(false);
+        }
+        else
+        {
+            playerControl.MoveDown();
+            terraScript.Take(false);
+        }
+    }
+    #endregion
 }

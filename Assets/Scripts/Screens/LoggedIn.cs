@@ -7,9 +7,11 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine.UI;
 
+/// <summary>
+/// Depricated - Sends a notification email to specified email address whenever a user loggs in
+/// </summary>
 public class LoggedIn : MonoBehaviour
 {
-    
     void Start()
     {
         Send();

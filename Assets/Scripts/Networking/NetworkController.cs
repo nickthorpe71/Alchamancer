@@ -1,5 +1,9 @@
 ﻿using Photon.Pun;
 using UnityEngine;
+
+/// <summary>
+/// Handles initial connection to the Photon Server
+/// </summary>
 public class NetworkController : MonoBehaviourPunCallbacks
 {
 
@@ -8,7 +12,6 @@ public class NetworkController : MonoBehaviourPunCallbacks
         PhotonNetwork.ConnectUsingSettings();
 
         InvokeRepeating("ConnectionAttempt", 0, 2);
-
     }
 
     void ConnectionAttempt()

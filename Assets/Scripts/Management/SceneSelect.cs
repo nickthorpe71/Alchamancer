@@ -4,6 +4,9 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Script for navigating through scenes - Each function is titled by the name of the scene to which it navigates
+/// </summary>
 public class SceneSelect : MonoBehaviour
 {
     public static SceneSelect instance;

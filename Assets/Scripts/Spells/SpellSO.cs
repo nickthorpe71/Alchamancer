@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Sctiptable object for each spell - determines everything from mana cost to sound effects
+/// </summary>
 [CreateAssetMenu(fileName = "Spell", menuName = "ScriptableObjects/SpellSO", order = 1)]
 public class SpellSO : ScriptableObject
 { 

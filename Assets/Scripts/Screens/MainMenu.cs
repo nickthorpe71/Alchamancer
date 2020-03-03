@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Main scrpt for the main menu scene - primarily for populating UI display
+/// </summary>
 public class MainMenu : MonoBehaviour
 {
     public AudioClip mainMenuMusic;
@@ -42,8 +45,6 @@ public class MainMenu : MonoBehaviour
     {
         Application.runInBackground = true;
 
-        CheckForC();
-
         database = Database.instance;
         saveLoad = SaveLoad.instance;
         soundManager = SoundManager.instance;
@@ -52,6 +53,7 @@ public class MainMenu : MonoBehaviour
 
         CheckSkinImage();
 
+        //Set the initial UI display to a placeholder
         if (saveLoad.doneTutorial)
         {
             playerName.text = saveLoad.playerName;
@@ -74,15 +76,10 @@ public class MainMenu : MonoBehaviour
         InvokeRepeating("Refresh", 0, 30);
     }
 
-    void CheckForC()
-    {
-        if (SaveLoad.instance.playerName == "CUNT")
-        {
-            Database.RemoveRow("CUNT");
-            Database.AddNewRow("I Respect Women", SaveLoad.instance.playerRP, 0, SystemInfo.deviceUniqueIdentifier);
-        }
-    }
-
+    /// <summary>
+    /// Use players Rank Points to display the correct title
+    /// </summary>
+    /// <param name="_rp"></param>
     void SetTitle(int _rp)
     {
 
@@ -113,6 +110,9 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the display of characters selected character skin
+    /// </summary>
     private void CheckSkinImage()
     {
         foreach (GameObject skin in skins)
@@ -123,6 +123,9 @@ public class MainMenu : MonoBehaviour
         skins[saveLoad.characterSkin].SetActive(true);
     }
 
+    /// <summary>
+    /// Sends player into the single player scene
+    /// </summary>
     public void SinglePlayerStart()
     {
         Carry.instance.levelInfo = TwoPlayerMapGen.instance.MapGen();
@@ -131,6 +134,9 @@ public class MainMenu : MonoBehaviour
         SceneSelect.instance.SinglePlayer();
     }
 
+    /// <summary>
+    /// Refreshed the verstion number, news1 and news2
+    /// </summary>
     public void Refresh()
     {
         StartPullInfo("News1");
@@ -139,11 +145,20 @@ public class MainMenu : MonoBehaviour
         StartPullInfo(FormatForDatabase(SaveLoad.instance.playerName));
     }
 
+    /// <summary>
+    /// Starts pulling info for main menu from the database
+    /// </summary>
+    /// <param name="infoName"></param>
     public void StartPullInfo(string infoName)
     {
         StartCoroutine(PullInfoRoutine(infoName));
     }
 
+    /// <summary>
+    /// Runs a routine to pull main menu info from database once download is complete
+    /// </summary>
+    /// <param name="infoName"></param>
+    /// <returns></returns>
     public IEnumerator PullInfoRoutine(string infoName)
     {
         WWW www = new WWW(Database.instance.webURL + Database.instance.privateCode + "/pipe-get/" + WWW.EscapeURL(infoName));
@@ -167,6 +182,11 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Takes the downloaded info from the database and populates the display UI
+    /// </summary>
+    /// <param name="textStream"></param>
+    /// <param name="infoName"></param>
     public void PullInfoFinal(string textStream, string infoName)
     {
         lobbyController.quickStartButton.GetComponent<Button>().interactable = true;
@@ -209,6 +229,9 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Switches form current news being displayed to the other news
+    /// </summary>
     void RotateNews()
     {
         if (newsInt == 0)
@@ -223,6 +246,11 @@ public class MainMenu : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Takes inserted text and replaces " " with "+" so it can be read by database
+    /// </summary>
+    /// <param name="username"></param>
+    /// <returns></returns>
     private string FormatForDatabase(string username)
     {
         string dataFormat = "";

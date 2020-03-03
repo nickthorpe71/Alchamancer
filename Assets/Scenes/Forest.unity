@@ -465,7 +465,7 @@ Transform:
   - {fileID: 2070034663}
   - {fileID: 1023451965}
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &16528776
 GameObject:
@@ -4376,60 +4376,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &162058198
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 162058200}
-  - component: {fileID: 162058199}
-  m_Layer: 0
-  m_Name: ReconnectController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &162058199
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 162058198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26460ad95e3df4320b764815adf5a950, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  savePos: {x: 0, y: 0, z: 0}
-  waterCount: 0
-  plantCount: 0
-  fireCount: 0
-  rockCount: 0
-  lifeCount: 0
-  deathCount: 0
-  energy: 0
-  currentMana: 0
-  poisoned: 0
-  burnt: 0
---- !u!4 &162058200
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 162058198}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 530.64795, y: 971.32214, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &162436710
 GameObject:
   m_ObjectHideFlags: 0
@@ -5668,7 +5614,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &199368192
 GameObject:
@@ -9152,7 +9098,7 @@ Transform:
   - {fileID: 1829615293}
   - {fileID: 783980677}
   m_Father: {fileID: 0}
-  m_RootOrder: 16
+  m_RootOrder: 15
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &379993193
 GameObject:
@@ -13281,7 +13227,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &524863206
 GameObject:
@@ -19981,7 +19927,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 19
+  m_RootOrder: 18
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &743266049
 GameObject:
@@ -21197,7 +21143,7 @@ Transform:
   - {fileID: 364815826}
   - {fileID: 2000710052}
   m_Father: {fileID: 0}
-  m_RootOrder: 15
+  m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &770619159
 GameObject:
@@ -22457,7 +22403,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000012067801, y: -0.0000018220063}
+  m_AnchoredPosition: {x: 0.000012067801, y: -0.000016841917}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &804134121
@@ -24353,7 +24299,7 @@ Transform:
   - {fileID: 977504334}
   - {fileID: 1151136384}
   m_Father: {fileID: 0}
-  m_RootOrder: 18
+  m_RootOrder: 17
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &869265995
 GameObject:
@@ -25214,7 +25160,7 @@ RectTransform:
   - {fileID: 302785567390201315}
   - {fileID: 85093654}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -25942,7 +25888,6 @@ MonoBehaviour:
   - {fileID: 18698667}
   - {fileID: 1738783879}
   myTurn: 0
-  collectPhase: 0
   otherPlayerSkin: 0
   otherPlayerRP: 0
   timer: {fileID: 1373945982}
@@ -34557,7 +34502,7 @@ RectTransform:
   - {fileID: 788513111}
   - {fileID: 602551909}
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -36259,7 +36204,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 20
+  m_RootOrder: 19
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1278123718
 GameObject:
@@ -38371,7 +38316,7 @@ Transform:
   m_LocalScale: {x: 132.78206, y: 171.3153, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1344951570
 GameObject:
@@ -47250,7 +47195,7 @@ Transform:
   - {fileID: 2126576895}
   - {fileID: 416128634}
   m_Father: {fileID: 0}
-  m_RootOrder: 17
+  m_RootOrder: 16
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1504169172
 GameObject:
@@ -47295,7 +47240,7 @@ Transform:
   - {fileID: 809371893}
   - {fileID: 385901731}
   m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_RootOrder: 13
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1505746636
 GameObject:
@@ -53642,8 +53587,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1998838492}
   m_HandleRect: {fileID: 1998838491}
   m_Direction: 2
-  m_Value: 0
-  m_Size: 1
+  m_Value: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -65704,7 +65649,7 @@ Transform:
   - {fileID: 209930805}
   - {fileID: 1138274263}
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1828237960
 GameObject:
@@ -72693,7 +72638,7 @@ RectTransform:
   - {fileID: 456201592}
   - {fileID: 1147092367}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -73098,7 +73043,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spellCaster: {fileID: 828898567}
-  attDefIncrement: 15
   p1Name: {fileID: 1768461456}
   p1RP: {fileID: 1857171442}
   p1Bar: {fileID: 1886307717}

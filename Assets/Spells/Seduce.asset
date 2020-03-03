@@ -24,9 +24,9 @@ MonoBehaviour:
   changeLandscape: 
   healAmount: 0
   myAttkInt: 0
-  theirAttkInt: -25
+  theirAttkInt: 0
   myDefInt: 0
-  theirDefInt: 0
+  theirDefInt: -20
   stealHealth: 0
   counter: 0
   spiritWalk: 0

@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// SinglePlayer - Stores all objects on the grid with masterGrid dictinoary and handles replacing objects with Replace() and SpawnRandom() functions
+/// </summary>
 public class CellManagerOffline : MonoBehaviour
 {
     public static CellManagerOffline instance;
@@ -9,6 +13,8 @@ public class CellManagerOffline : MonoBehaviour
     [Header("Elements")]
     public Dictionary<Vector3, GameObject> masterGrid = new Dictionary<Vector3, GameObject>();
     public string startString;
+    //Currently all matches are played on a standardized set of elements instead of a randomizes one
+    //This standardized set is called realString which replaced startString
     private string realString = "4,3,6,2,6,3,4,5,2,7,3,7,2,5,7,6,5,4,5,6,7,1,1,1,8,1,1,1,2,3,4,5,4,3,2,4,7,2,6,2,7,4,5,6,3,7,3,6,5";
     public GameObject[] startMaterials;
     private int startMatInt = 0;
@@ -56,11 +62,13 @@ public class CellManagerOffline : MonoBehaviour
         elements.Add(life);
         elements.Add(death);
 
-        //startString = carryScript.levelString;
         startString = realString;
         FillByCode();
     }
 
+    /// <summary>
+    /// Spawns a random element on the grid in place of dirt(empty)
+    /// </summary>
     public void SpawnRandom()
     {
         for (int i = 0; i < 100; i++)
@@ -78,35 +86,12 @@ public class CellManagerOffline : MonoBehaviour
         }
     }
 
-    public void CheckIfTapped()
-    {
-        bool tapped = true;
-
-        int y = 0;
-
-        for (int i = 0; i < 7; i++)
-        {
-            y++;
-            int x = 0;
-
-            for (int n = 0; n < 7; n++)
-            {
-                x++;
-
-                Vector3 masterVec = new Vector3(x, y, 0);
-
-                if (masterGrid[masterVec] != dirt)
-                    tapped = false;
-            }
-        }
-
-        if (tapped)
-            FillByCode();
-
-        print("tapped = " + tapped);
-
-    }
-
+    /// <summary>
+    /// Remplaces the game object in the pos(position) with the provided replacement object and passes this to other players
+    /// to keep the grid consistant to all players
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <param name="replacement"></param>
     public void Replace(Vector3 pos, GameObject replacement)
     {
         GameObject old = masterGrid[pos];
@@ -117,6 +102,9 @@ public class CellManagerOffline : MonoBehaviour
         DestroyImmediate(old, true);
     }
 
+    /// <summary>
+    /// Fill the masterGrid using the provided realString (use startString to randomize te field)
+    /// </summary>
     public void FillByCode()
     {
         string[] temp;

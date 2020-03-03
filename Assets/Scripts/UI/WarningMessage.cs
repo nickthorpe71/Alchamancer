@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Used to show warning before online matches
+/// </summary>
 public class WarningMessage : MonoBehaviour
 {
     public GameObject warningBox;

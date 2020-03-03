@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Allows music and SFX volume to be changed
+/// </summary>
 public class VolumeValueChange : MonoBehaviour
 {
     public AudioSource audioSorc;
@@ -38,7 +41,6 @@ public class VolumeValueChange : MonoBehaviour
     public void SetMusicVolume(float vol)
     {
         musicVolume = vol;
-        //audioSorc.volume = musicVolume;
     }
 
     public void SetSFXVolume(float vol)

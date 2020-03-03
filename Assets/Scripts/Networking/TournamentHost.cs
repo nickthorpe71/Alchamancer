@@ -6,11 +6,14 @@ using Photon.Realtime;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+/// <summary>
+/// Allows tournament host to spectate the match without affecting gameplay and allows players to send messages to the tournament host
+/// </summary>
 public class TournamentHost : MonoBehaviourPunCallbacks
 {
     public static TournamentHost instance;
 
-    public GameObject blocker;
+    public GameObject blocker; //blocks out main game controls UI from being displayed
     public GameObject timer;
 
     private SaveLoad saveLoad;
@@ -45,7 +48,6 @@ public class TournamentHost : MonoBehaviourPunCallbacks
         if (SaveLoad.instance.tournamentHost)
         {
             blocker.SetActive(true);
-            //statsManager.enabled = false;
         }
     }
 
@@ -60,7 +62,6 @@ public class TournamentHost : MonoBehaviourPunCallbacks
 
             p1Bar.SetValue(200);
             p2Bar.SetValue(200);
-
         }
     }
 
@@ -71,28 +72,47 @@ public class TournamentHost : MonoBehaviourPunCallbacks
             if (Input.GetKey(KeyCode.Space))
                 GetComponent<PauseMenu>().ClickPauseMenu();
 
+            //Starts countdown timer on all clients
             if (Input.GetKey(KeyCode.T))
-                base.photonView.RPC("RPC_StartTimer", RpcTarget.AllBuffered);
+                base.photonView.RPC("RPC_StartTimer", RpcTarget.AllBuffered); 
         }
     }
 
+    /// <summary>
+    /// Receives message to start countdown timer
+    /// </summary>
     [PunRPC]
     public void RPC_StartTimer()
     {
         timer.SetActive(true);
     }
 
+    /// <summary>
+    /// Starts a routine that sends local players name and rp to tournament host
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="rp"></param>
     public void SetPlayerInfo(string name, string rp)
     {
         StartCoroutine(SetPlayerInfoRoutine(name, rp));
     }
 
+    /// <summary>
+    /// Sends local players name and rp to tournament host
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="rp"></param>
     public IEnumerator SetPlayerInfoRoutine(string name, string rp)
     {
         yield return new WaitForSeconds(3);
         base.photonView.RPC("RPC_SetPlayerInfo", RpcTarget.AllBuffered, name, rp);
     }
 
+    /// <summary>
+    /// Receives other players info and sets it in the UI display
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="rp"></param>
     [PunRPC]
     public void RPC_SetPlayerInfo(string name, string rp)
     {
@@ -111,12 +131,22 @@ public class TournamentHost : MonoBehaviourPunCallbacks
             }
         }
     }
-    
+
+    /// <summary>
+    /// Used by players to send tournament host a message that their health changed
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="amount"></param>
     public void AdjustHealth(string name, int amount)
     {
         base.photonView.RPC("RPC_AdjustHealth", RpcTarget.AllBuffered, name, amount);
     }
 
+    /// <summary>
+    /// Reveices health adjustments from players to tournament host
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="amount"></param>
     [PunRPC]
     public void RPC_AdjustHealth(string name, int amount)
     {
@@ -135,11 +165,21 @@ public class TournamentHost : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Used by players to send tournament host a message that their poison or burn status changed
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="amount"></param>
     public void SetPsnBrn(string name, string effect,  bool onOff)
     {
         base.photonView.RPC("RPC_SetPsnBrn", RpcTarget.AllBuffered, name, effect, onOff);
     }
 
+    /// <summary>
+    /// Reveices poison and burn status adjustments from players to tournament host
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="amount"></param>
     [PunRPC]
     public void RPC_SetPsnBrn(string name, string effect, bool onOff)
     {
@@ -162,12 +202,24 @@ public class TournamentHost : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Sends projectile info from players to tournament host to be played on tournament host client
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <param name="_projectile"></param>
     public void SubmitAttackProjectile( Vector3 start, Vector3 end, string _projectile)
     {
         if(PhotonNetwork.IsMasterClient)
             base.photonView.RPC("RPC_Projectile", RpcTarget.AllBuffered, start, end, _projectile);
     }
 
+    /// <summary>
+    /// Receives projectile from players to be played on tournament host client
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <param name="_projectile"></param>
     [PunRPC]
     public void RPC_Projectile(Vector3 start, Vector3 end, string _projectile)
     {
@@ -180,12 +232,22 @@ public class TournamentHost : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Sends stationart attack info from players to tournament host to be played on tournament host client
+    /// </summary>
+    /// <param name="location"></param>
+    /// <param name="effect"></param>
     public void SubmitAttackLocation(Vector3 location,  string effect)
     {
         if (PhotonNetwork.IsMasterClient)
             base.photonView.RPC("RPC_Location", RpcTarget.AllBuffered, location, effect);
     }
 
+    /// <summary>
+    /// Receives stationary attack from players to be played on tournament host client
+    /// </summary>
+    /// <param name="location"></param>
+    /// <param name="effect"></param>
     [PunRPC]
     public void RPC_Location(Vector3 location, string effect)
     {
@@ -194,9 +256,5 @@ public class TournamentHost : MonoBehaviourPunCallbacks
             Instantiate(animationDict[effect], location, Quaternion.identity);
         }
     }
-
-
-
-
 
 }

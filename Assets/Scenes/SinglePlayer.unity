@@ -29156,7 +29156,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1180080710}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -41722,7 +41722,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000012067801, y: -0.0000014509951}
+  m_AnchoredPosition: {x: 0.000012067801, y: -0.00000031704548}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1314714833
@@ -60921,7 +60921,8 @@ PrefabInstance:
       propertyPath: InstantiationId
       value: 24
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4485207462751051083, guid: 4cc4a006dc0df4c71b321b4a23854421, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 4cc4a006dc0df4c71b321b4a23854421, type: 3}
 --- !u!1 &1652299404 stripped
 GameObject:
@@ -80613,7 +80614,6 @@ MonoBehaviour:
   redMask: {fileID: 523609652}
   blueMask: {fileID: 1311710178}
   isAI: 1
-  source: {x: 0, y: 0, z: 0}
   canMove: 0
   startPosition: {x: 0, y: 0, z: 0}
   spiritWalk: 0

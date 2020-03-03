@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Displays all score UI on leaderboard scene
+/// </summary>
 public class DisplayScores : MonoBehaviour
 {
     public ScoreListing scoreListing;
@@ -20,6 +23,10 @@ public class DisplayScores : MonoBehaviour
         StartCoroutine(RefreshScores());
     }
 
+    /// <summary>
+    /// Attempts to download top 100 scores from database
+    /// </summary>
+    /// <param name="rows"></param>
     public void OnDownloadedScores(Row[] rows)
     {
         for (int i = 0; i < rows.Length; i++)
@@ -36,17 +43,16 @@ public class DisplayScores : MonoBehaviour
             }
         }
 
-        StartSetMyScore();
+        StartCoroutine(SetMyScoreRoutine());
 
         if (loadingObj.activeSelf && loadingObj != null)
             loadingObj.SetActive(false);
     }
 
-    public void StartSetMyScore()
-    {
-        StartCoroutine(SetMyScoreRoutine());
-    }
-
+    /// <summary>
+    /// Attempts to download the score for the local player
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator SetMyScoreRoutine()
     {
         WWW www = new WWW(database.webURL + database.privateCode + "/pipe-get/" + WWW.EscapeURL(SaveLoad.instance.playerName));
@@ -60,6 +66,10 @@ public class DisplayScores : MonoBehaviour
             print("Error pulling Alchamancer info " + www.error);
     }
 
+    /// <summary>
+    /// Sets UI display for local players score
+    /// </summary>
+    /// <param name="textStream"></param>
     public void SetMyScore(string textStream)
     {
         string[] entryInfo = textStream.Split(new char[] { '|' });
@@ -74,6 +84,10 @@ public class DisplayScores : MonoBehaviour
         myScore.Initialize(rp, username);
     }
 
+    /// <summary>
+    /// Downloads and updates leaderboard listing
+    /// </summary>
+    /// <returns></returns>
     IEnumerator RefreshScores()
     {
         while(true)

@@ -7,6 +7,9 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine.UI;
 
+/// <summary>
+/// Manages the exp gain and leveling up for the game itself
+/// </summary>
 public class AlchaLevels : MonoBehaviour
 {
     public Text levelText;
@@ -40,6 +43,9 @@ public class AlchaLevels : MonoBehaviour
         StartCoroutine(SetInfoRoutine());
     }
 
+    /// <summary>
+    /// Pulls info from database then runs SetInfo
+    /// </summary>
     public IEnumerator SetInfoRoutine()
     {
         WWW www = new WWW(database.webURL + database.privateCode + "/pipe-get/" + WWW.EscapeURL("Alchamancer"));
@@ -53,6 +59,10 @@ public class AlchaLevels : MonoBehaviour
             print("Error pulling Alchamancer info " + www.error);
     }
 
+    /// <summary>
+    /// Takes the Info pulled from the database and populates all text fields and value fields on screen
+    /// </summary>
+    /// <param name="textStream"></param>
     public void SetInfo(string textStream)
     {
         string[] entryInfo = textStream.Split(new char[] { '|' });
@@ -85,11 +95,20 @@ public class AlchaLevels : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Takes in the current level of the game and calculates how much exp to get to the next level 
+    /// </summary>
+    /// <param name="level"></param>
     int ExpMod(int level)
     {
         return Mathf.RoundToInt(13 * level + (level * 189.92f));
     }
 
+    /// <summary>
+    /// Function called when player presses a button to donate. Adds exp to the game and records the donation to the database.
+    /// </summary>
+    /// <param name="addedExp"></param>
+    /// <param name="donation"></param>
     public void AddExp(int addedExp, float donation)
     {
         startLevel = currentLevel;
@@ -135,6 +154,10 @@ public class AlchaLevels : MonoBehaviour
         StartCoroutine(SendToDatabase(newDonation));
     }
 
+    /// <summary>
+    /// Records the donation in the database and give a 5 second window before the player can donate again
+    /// </summary>
+    /// <param name="newDonations"></param>
     IEnumerator SendToDatabase(string newDonations)
     {
         addButtons.SetActive(false);
@@ -144,10 +167,14 @@ public class AlchaLevels : MonoBehaviour
 
         yield return new WaitForSeconds(5);
 
-        database.Download();
-        database.SendAlchamancer(this);
+        StartSetInfo();
     }
 
+    /// <summary>
+    /// Called when the exp added is more than the remaining exp to level up
+    /// </summary>
+    /// <param name="levelsToGain"></param>
+    /// <returns></returns>
     public IEnumerator LevelUp(int levelsToGain)
     {
         int tempLevel = startLevel;
@@ -177,16 +204,25 @@ public class AlchaLevels : MonoBehaviour
         currentExp = finalExp;
     }
 
+    /// <summary>
+    /// Exit to main menu
+    /// </summary>
     public void LeaveEarly()
     {
         SceneSelect.instance.MainMenuButton();
     }
 
+    /// <summary>
+    /// Exit to leaderboard
+    /// </summary>
     public void LeaveEarlyToLeaderboards()
     {
         SceneSelect.instance.LeaderBoard();
     }
 
+    /// <summary>
+    /// Sends me an email anytime the game updates so I can address this on social media
+    /// </summary>
     void SendLevelUpdate()
     {
         MailMessage mail = new MailMessage();
@@ -206,7 +242,4 @@ public class AlchaLevels : MonoBehaviour
         smtpServer.Send(mail);
         Debug.Log("success");
     }
-
-
-
 }

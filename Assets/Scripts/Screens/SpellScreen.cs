@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Main script for the Spel Library Scene 
+/// </summary>
 public class SpellScreen : MonoBehaviour
 {
     public static SpellScreen instance;
@@ -30,6 +33,9 @@ public class SpellScreen : MonoBehaviour
         DisplayToolTip("", "Tap the i icon for information about a spell" , "-");
     }
 
+    /// <summary>
+    /// Populates the UI list of spells
+    /// </summary>
     private void PopulateSpellList()
     {
         for (int i = 0; i < spells.Length; i++)
@@ -45,6 +51,12 @@ public class SpellScreen : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Function that displays the tooltip for each spell
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="message"></param>
+    /// <param name="pow"></param>
     public void DisplayToolTip(string name, string message, string pow)
     {
         toolName.text = name;

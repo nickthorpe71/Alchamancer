@@ -7,6 +7,9 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using UnityEngine.UI;
 
+/// <summary>
+/// Allows players to send their email to me and therefore join the mailing list
+/// </summary>
 public class EmailList : MonoBehaviour
 {
     public Text email;

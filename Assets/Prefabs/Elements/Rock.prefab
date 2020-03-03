@@ -67,7 +67,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -123553417
-  m_SortingLayer: 7
+  m_SortingLayer: 9
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300150, guid: c2957f4d831870a48af4ec016652548d, type: 3}
   m_Color: {r: 0.8862745, g: 0.7687265, b: 0.6381177, a: 1}
@@ -92,6 +92,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5712692f6afd4deab6d27bf0b6b9bf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sound: {fileID: 8300000, guid: 401c2fe108b524a2cba1856423e80fe1, type: 3}
-  castEffect: {fileID: 3255425522286702066, guid: 540f593ba718744818c2d88fc2a3e4b6,
-    type: 3}
+  sound: {fileID: 8300000, guid: 04d0c0a67b8c7434c9d83a9bee69cc71, type: 3}

@@ -7189,7 +7189,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7777650882286658577}
-  - component: {fileID: 4485207462751051083}
   - component: {fileID: 8672998098381233237}
   - component: {fileID: 1083886067915509347}
   m_Layer: 0
@@ -7217,20 +7216,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4485207462751051083
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7801200394591912754}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1390eb1c10ed5413e8930113ab54615e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  moveComplete: 1
-  castableSpells: []
 --- !u!114 &8672998098381233237
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7247,7 +7232,6 @@ MonoBehaviour:
   redMask: {fileID: 1689805338}
   blueMask: {fileID: 324790519}
   isAI: 0
-  source: {x: 0, y: 0, z: 0}
   canMove: 0
   startPosition: {x: 0, y: 0, z: 0}
   spiritWalk: 0

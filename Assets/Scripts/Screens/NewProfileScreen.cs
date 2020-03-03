@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Main script for New Profile scene
+/// </summary>
 public class NewProfileScreen : MonoBehaviour
 {
     public GameObject nameObj;

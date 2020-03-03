@@ -5,29 +5,38 @@ using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
 
+/// <summary>
+/// Contains different methods for creating a string to generate starting map
+/// </summary>
 public class TwoPlayerMapGen : MonoBehaviourPunCallbacks
 {
-    public static TwoPlayerMapGen instance;
+    public static TwoPlayerMapGen instance; //Allows this scrips to be easily accessed by other scripts in the scene
 
-    public string finalString;
-    public int amountOfElement;
+    public string finalString; //The string that will be used to create the map
 
-    public LevelSO random2Plevel;
+    public LevelSO random2Plevel; //Used to transfer the string
 
     private void Awake()
     {
         instance = this;
     }
 
+    /// <summary>
+    /// Called to create a LevelSO - currently purely to generate a starting string
+    /// </summary>
     public LevelSO MapGen()
     {
         random2Plevel = new LevelSO();
 
-        random2Plevel.startString = MapStringSemetricalRandom();
+        random2Plevel.startString = MapStringSemetricalRandom(); //Generate teh starting string
 
         return random2Plevel;
     }
 
+    /// <summary>
+    /// Creates a starting map string that is completely random
+    /// </summary>
+    /// <returns></returns>
     public string MapStringFullRandom()
     {
         finalString = "";
@@ -71,6 +80,9 @@ public class TwoPlayerMapGen : MonoBehaviourPunCallbacks
         return finalString;
     }
 
+    /// <summary>
+    /// Creates a starting map string that is random but semetrical 
+    /// </summary>
     public string MapStringSemetricalRandom()
     {
         finalString = "";
@@ -93,7 +105,7 @@ public class TwoPlayerMapGen : MonoBehaviourPunCallbacks
             }
             else if (i == 3)
             {
-                finalString += ",1,1,1,8,1,1,1";
+                finalString += ",1,1,1,8,1,1,1"; //makes the middle row clear except a blocker in the middle 
             }
             else
             {

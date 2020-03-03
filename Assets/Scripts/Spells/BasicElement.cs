@@ -2,6 +2,9 @@
 using Photon.Pun;
 using UnityEngine;
 
+/// <summary>
+/// Script placed on each element prefab to trigger their sound effect
+/// </summary>
 public class BasicElement : MonoBehaviour
 {
     public AudioClip sound;

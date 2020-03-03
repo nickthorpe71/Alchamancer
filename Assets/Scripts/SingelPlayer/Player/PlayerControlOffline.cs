@@ -5,42 +5,40 @@ using UnityEngine.UI;
 
 public class PlayerControlOffline : MonoBehaviour
 {
-    private Vector3 fp;   
-    private Vector3 lp;   
-    private float dragDistance;
-
+    /// <summary>
+    /// Singleplayer Version - Handles movement controls and movement animation for the player object
+    /// </summary>
     [Header("Player")]
-    public string screenName;
-    public GameObject redMask;
-    public GameObject blueMask;
-    public bool isAI;
+    public string screenName; //UI display for players username
+    public GameObject redMask; //A marker to distinguish which player belongs to local player
+    public GameObject blueMask; //A marker to distinguish which player belongs to local player
+    public bool isAI; //Set if this player object is controlled by AI
 
     [Header("Movement")]
-    public Vector3 source;
-    public bool canMove;
-    public Vector3 startPosition;
-    public bool spiritWalk;
+    public bool canMove; //To easily stop movement
+    public Vector3 startPosition; 
+    public bool spiritWalk; //Whether player has spirit walk effect active
     public GameObject upButton;
     public GameObject downButton;
     public GameObject leftButton;
     public GameObject rightButton;
 
     [Header("Target")]
-    public Vector3 targetPos;
-    public GameObject targetObj;
+    public Vector3 targetPos; //The grid position currently targeted
+    public GameObject targetObj; //The object that is in the target position
 
     [Header("Animation")]
-    [HideInInspector] public GameObject currentSprite;
-    public List<GameObject> spriteList = new List<GameObject>();
-    public Animator animator;
-    public GameObject spiritWalkEffect;
+    [HideInInspector] public GameObject currentSprite; //The active character skin sprite
+    public List<GameObject> spriteList = new List<GameObject>(); //A list of all possible character skin sprites
+    public Animator animator; //The animator of the current character skin sprite
+    public GameObject spiritWalkEffect; //Particle effect object to be activated when spirit walk spell is active
 
     [Header("Health")]
-    public bool poisoned;
-    public bool burnt; 
+    public bool poisoned; //Whether or not this player is poisoned
+    public bool burnt; //Whether or not this player is burnt
 
     [Header("Managers")]
-    private TerraformOffline terraformScript;
+    private TerraformOffline terraformScript; 
     public GameManagerOffline gameManager;
     public CellManagerOffline cellManager;
     public StatsManagerOffline statsManager;
@@ -53,25 +51,26 @@ public class PlayerControlOffline : MonoBehaviour
     public bool facingRight;
 
     [Header("SFX")]
-    public AudioClip moveSound;
+    public AudioClip moveSound; //Sound playen when moving tile to tile
 
     private void Awake()
     {
         if (!isAI)
         {
-            currentSprite = spriteList[SaveLoad.instance.characterSkin];
+            currentSprite = spriteList[SaveLoad.instance.characterSkin]; //Select the character skin sprite for the player
             redMask.SetActive(true);
         }
         else
         {
-            currentSprite = spriteList[GetComponent<OpponentCreator>().skin];
-            if(GetComponent<OpponentCreator>().skin == SaveLoad.instance.numOfAvailableSkins)
+            currentSprite = spriteList[GetComponent<OpponentCreator>().skin]; //Select the character skin sprite for the AI
+
+            if (GetComponent<OpponentCreator>().skin == SaveLoad.instance.numOfAvailableSkins)
                 blueMask.SetActive(false);
             else
                 blueMask.SetActive(true);
         }
 
-        currentSprite.SetActive(true);
+        currentSprite.SetActive(true); //Activate the selected character skin sprite
         animator = currentSprite.GetComponent<Animator>();
 
         facingFront = true;
@@ -83,8 +82,6 @@ public class PlayerControlOffline : MonoBehaviour
 
     void Start()
     {
-        dragDistance = Screen.height * 8 / 100;
-
         terraformScript = GetComponent<TerraformOffline>();
         soundManager = SoundManager.instance;
 
@@ -93,6 +90,7 @@ public class PlayerControlOffline : MonoBehaviour
             gameManager.playerControl = GetComponent<PlayerControlOffline>();
             gameManager.terraScript = GetComponent<TerraformOffline>();
 
+            //Set all UI buttons to apropriate functions
             upButton = GameObject.FindGameObjectWithTag("UpButton");
             upButton.GetComponent<Button>().onClick.AddListener(delegate { MoveUp(); });
 
@@ -106,12 +104,17 @@ public class PlayerControlOffline : MonoBehaviour
             rightButton.GetComponent<Button>().onClick.AddListener(delegate { MoveRight(); });
         }
 
+        //Set targetObj to the element in front of player using masterGrid in CellManager
         cellManager.masterGrid.TryGetValue(targetPos, out targetObj);
 
+        //Pass targetObj to Terraform script target
         terraformScript.target = targetObj;
 
     }
 
+    /// <summary>
+    /// Moves the player up if they are facing up otherwise faces them up
+    /// </summary>
     public void MoveUp()
     {
         targetPos = new Vector3(transform.position.x, transform.position.y + 1, 0);
@@ -143,6 +146,9 @@ public class PlayerControlOffline : MonoBehaviour
         terraformScript.target = targetObj;
     }
 
+    /// <summary>
+    /// Moves the player down if they are facing up otherwise faces them down
+    /// </summary>
     public void MoveDown()
     {
         targetPos = new Vector3(transform.position.x, transform.position.y - 1, 0);
@@ -174,6 +180,9 @@ public class PlayerControlOffline : MonoBehaviour
         terraformScript.target = targetObj;
     }
 
+    /// <summary>
+    /// Moves the player left if they are facing up otherwise faces them left
+    /// </summary>
     public void MoveLeft()
     {
         targetPos = new Vector3(transform.position.x - 1, transform.position.y, 0);
@@ -204,6 +213,9 @@ public class PlayerControlOffline : MonoBehaviour
         terraformScript.target = targetObj;
     }
 
+    /// <summary>
+    /// Moves the player right if they are facing right otherwise  faces them right
+    /// </summary>
     public void MoveRight()
     {
         targetPos = new Vector3(transform.position.x + 1, transform.position.y, 0);
@@ -233,29 +245,9 @@ public class PlayerControlOffline : MonoBehaviour
         terraformScript.target = targetObj;
     }
 
-    public void KeyboardControls()
-    {    
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            MoveUp();
-        }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            MoveDown();
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            MoveLeft();
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            MoveRight();
-        }
-    }
-
+    /// <summary>
+    /// Sets all facing direction bools in animator to false
+    /// </summary>
     public void AnimBoolFalse()
     {
         animator.SetBool("FaceFront", false);
@@ -264,6 +256,9 @@ public class PlayerControlOffline : MonoBehaviour
         animator.SetBool("FaceRight", false);
     }
 
+    /// <summary>
+    /// Sets all facing direction bools in this PlayerControl to false
+    /// </summary>
     public void FacingBoolReset()
     {
         facingBack = false;
@@ -272,12 +267,18 @@ public class PlayerControlOffline : MonoBehaviour
         facingFront = false;
     }
 
+    /// <summary>
+    /// Grouping of things to be done on every movement
+    /// </summary>
     public void MovePosition()
     {
         soundManager.PlaySingle(moveSound, 1);
         transform.position = targetPos;
     }
 
+    /// <summary>
+    /// Function to check if the player is poisoned or burnt at the end of each turn - if so it also sends a message to remove health
+    /// </summary>
     public void DoT()
     {
         if (!isAI)
@@ -308,6 +309,9 @@ public class PlayerControlOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns true if the space we are trying to move to is already occupied by another player
+    /// </summary>
     public bool OtherPlayerCheck()
     {
         if (isAI)
@@ -327,6 +331,9 @@ public class PlayerControlOffline : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Refills energy at the beginning of each turn
+    /// </summary>
     public void NextTurn()
     {
         terraformScript.energy = 4;
@@ -334,16 +341,25 @@ public class PlayerControlOffline : MonoBehaviour
             terraformScript.CheckEnergy();
     }
 
+    /// <summary>
+    /// Sets burnt bool to false
+    /// </summary>
     public void UnBurn()
     {
         burnt = false;
     }
 
+    /// <summary>
+    /// Sets poisoned bool to false
+    /// </summary>
     public void UnPoision()
     {
 		poisoned = false;
 	}
 
+    /// <summary>
+    /// Turns spirit walk on and off
+    /// </summary>
     public void SpiritWalk()
     {
         if (spiritWalk)

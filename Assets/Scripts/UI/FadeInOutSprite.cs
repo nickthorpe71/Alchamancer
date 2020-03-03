@@ -2,6 +2,9 @@
 using UnityEngine.UI;
 using System.Collections;
 
+/// <summary>
+/// Makes a sprite fade in and out at a specified interval indefinitely
+/// </summary>
 public class FadeInOutSprite : MonoBehaviour
 {
     private SpriteRenderer sprite;

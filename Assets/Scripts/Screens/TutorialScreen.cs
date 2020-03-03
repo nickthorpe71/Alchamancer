@@ -2,16 +2,22 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Main script for 
+/// </summary>
 public class TutorialScreen : MonoBehaviour
 {
     public GameObject prevButton;
     public GameObject nextButton;
     public GameObject finishButton;
 
-    public List<GameObject> slides = new List<GameObject>();
+    public List<GameObject> slides = new List<GameObject>(); //Array holding all tutorial slides
 
     private int currentSlide;
 
+    /// <summary>
+    /// Moves the to next slide in the slides array
+    /// </summary>
     public void NextButton()
     {
         if(!prevButton.activeSelf)
@@ -32,6 +38,9 @@ public class TutorialScreen : MonoBehaviour
         SoundManager.instance.PlayButtonClick();
     }
 
+    /// <summary>
+    /// Moves the to previous slide in the slides array
+    /// </summary>
     public void PrevButton()
     {
         finishButton.SetActive(false);
@@ -49,6 +58,9 @@ public class TutorialScreen : MonoBehaviour
         SoundManager.instance.PlayButtonClick();
     }
 
+    /// <summary>
+    /// Sets the dontTutorial bool and saves to local data
+    /// </summary>
     public void TutorialComplete()
     {
         SaveLoad.instance.doneTutorial = true;

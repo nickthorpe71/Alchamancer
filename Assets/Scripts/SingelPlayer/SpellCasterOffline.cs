@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-
+/// <summary>
+/// Singleplayer Version - Handles calculating damage, effects and animations for all spells - Every spell is run through thisone manager for both the human player and AI player
+/// </summary>
 public class SpellCasterOffline : MonoBehaviour
 {
 
@@ -18,8 +20,8 @@ public class SpellCasterOffline : MonoBehaviour
     private PlayerControlOffline theirPlayerControl;
 
     [Header("UI")]
-    public GameObject noSpells;
-    public bool sorted;
+    public GameObject noSpells; //Message to state that there are no spells available
+    public bool sorted; //Bool indicating whether spells have been sorted
 
     [Header("AI")]
     public bool isAI;
@@ -32,23 +34,20 @@ public class SpellCasterOffline : MonoBehaviour
     private Vector3 targetPos;
 
     [Header("Spells")]
-    public SpellListSO spellLibrary;
-    public SpellSO[] spellsStandard;
-    public SpellListingOffline spellListing;
-    public Transform content;
-    public List<GameObject> spellButtons = new List<GameObject>();
-    public List<GameObject> animations = new List<GameObject>();
-    public Dictionary<string, GameObject> animationDict = new Dictionary<string, GameObject>();
-    public Dictionary<string, string> oppositeDict = new Dictionary<string, string>();
+    public SpellListSO spellLibrary; //Scriptable object holding all spell scriptable objects
+    public SpellSO[] spellsStandard; //Array of standard spell list
+    public SpellListingOffline spellListing; //Prefab for a spell listing button
+    public Transform content; //Area where spell listings will be displayed
+    public List<GameObject> spellButtons = new List<GameObject>(); //List of all spell listing buttons
+    public List<GameObject> animations = new List<GameObject>(); //List of all spell animations
+    public Dictionary<string, GameObject> animationDict = new Dictionary<string, GameObject>(); //Dictionary where the key is the animation name and value is the corrisponding animation
+    public Dictionary<string, string> oppositeDict = new Dictionary<string, string>(); //Dictionary for specifying each element's opposite
     public bool myMirror;
     public bool theirMirror;
 
-
-
-
     private void Start()
     {
-        Invoke("DelayedStart", 5);
+        Invoke("DelayedStart", 5); //Assign scrpts that may be generated a few seconds after atart of match
 
         PopulateOppositeDict();
 
@@ -59,6 +58,9 @@ public class SpellCasterOffline : MonoBehaviour
 		PopulateAnimationDictionary();
     }
 
+    /// <summary>
+    /// Sets up opposite dictionary 
+    /// </summary>
     void PopulateOppositeDict()
     {
         oppositeDict.Add("Blue", "Red");
@@ -69,6 +71,9 @@ public class SpellCasterOffline : MonoBehaviour
         oppositeDict.Add("Black", "White");
     }
 
+    /// <summary>
+    /// Runs scripts a few seconds after game starts
+    /// </summary>
     void DelayedStart()
     {
         gameManager = GameManagerOffline.instance;
@@ -81,6 +86,9 @@ public class SpellCasterOffline : MonoBehaviour
         theirPlayerControl = gameManager.theirPlayer.GetComponent<PlayerControlOffline>();
     }
 
+    /// <summary>
+    /// Sorts spells into a list of all spells
+    /// </summary>
     public void SortButtonAll()
     {
         ClearSpellButtons();
@@ -88,12 +96,19 @@ public class SpellCasterOffline : MonoBehaviour
         sorted = false;
     }
 
+    /// <summary>
+    /// Sorts spells into a list of only what we currently have enough mana for
+    /// </summary>
     public void SortButtonSorted()
     {
         SortSpells();
         sorted = true;
     }
 
+    /// <summary>
+    /// Populates UI display of spell buttons using spell listings and lsit of spell scriptable objects
+    /// </summary>
+    /// <param name="spells"></param>
     private void PopulateSpellList(SpellSO[] spells)
     {
         if (spells.Length > 0)
@@ -118,6 +133,9 @@ public class SpellCasterOffline : MonoBehaviour
         CheckCosts();
     }
 
+    /// <summary>
+    /// Clears all spell buttons from UI display
+    /// </summary>
     private void ClearSpellButtons()
     {
         for (int i = 0; i < spellButtons.Count; i++)
@@ -128,6 +146,9 @@ public class SpellCasterOffline : MonoBehaviour
         spellButtons.Clear();
     }
 
+    /// <summary>
+    /// Function called by sort button on UI display
+    /// </summary>
     private void SortSpells()
     {
         ClearSpellButtons();
@@ -154,6 +175,9 @@ public class SpellCasterOffline : MonoBehaviour
         PopulateSpellList(spellsSorted);
     }
 
+    /// <summary>
+    /// Sets up animation dictionary using animations list
+    /// </summary>
     private void PopulateAnimationDictionary()
     {
         foreach(GameObject anim in animations)
@@ -161,7 +185,10 @@ public class SpellCasterOffline : MonoBehaviour
             animationDict.Add(anim.name, anim);
         }
     }
-    
+
+    /// <summary>
+    /// Runs the CheckCost function on each spell listing to make that spell button interactable if we have enough mana or not interactable if we don't
+    /// </summary>
     public void CheckCosts()
     {
         foreach (GameObject button in spellButtons)
@@ -170,11 +197,17 @@ public class SpellCasterOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Main function for submitting a spell to be played and runs all appropriate damage and effect calculationas as well as triggers animations - Takes the power of the spell and the spell scriptable object
+    /// </summary>
+    /// <param name="power"></param>
+    /// <param name="spell"></param>
     public void SubmitAttack(int power, SpellSO spell, bool AI)
     {
         int attack = statsManager.myAttack;
         int defense = statsManager.theirDefense;
 
+        //Determine environment modifier
         float environment = 1;
 
         if (spell.color == AreaColorManagerOffline.instance.currentAreaColor)
@@ -203,7 +236,7 @@ public class SpellCasterOffline : MonoBehaviour
             defense = statsManager.myDefense;
         }
 
-        if (spell.counter)
+        if (spell.counter) //Check if the spell that was cast is a counter
         {
             if (!AI)
             {
@@ -240,7 +273,7 @@ public class SpellCasterOffline : MonoBehaviour
 
             }
         }
-        else
+        else  //Otherwise it is not a counter spell
         {
             soundManager.RPC_PlaySinglePublic(spell.spellName, 1);
 
@@ -259,7 +292,7 @@ public class SpellCasterOffline : MonoBehaviour
                 }
             }
 
-
+            //Main damage formula
             float damagePreRounding = ((22 * power * attack / defense/ 50)) * modifier;
 
             if (spell.category == "Attack")
@@ -267,6 +300,7 @@ public class SpellCasterOffline : MonoBehaviour
 
             int damage = Mathf.RoundToInt(damagePreRounding);
 
+            //Check if the spell is a mana consumption spell
             if (spell.eatMana)
             {
                 if (!AI)
@@ -313,9 +347,12 @@ public class SpellCasterOffline : MonoBehaviour
 
         if (sorted)
             SortButtonSorted();
-        CheckCosts();
+        CheckCosts(); //Check which spells we can afford after casting the last spell
     }
 
+    /// <summary>
+    /// Run for each spell cast to trigger any effects outside of dealing damage
+    /// </summary>
     private void FactorEffects(SpellSO spell, float modifier, bool AI)
     {
         //Screen Shake
@@ -414,6 +451,11 @@ public class SpellCasterOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// After damage amount is calculated this routine triggers animations and lowers health of damaged opponent on screen - Player feedback portion of spell casting
+    /// </summary>
+    /// <param name="damage"></param>
+    /// <param name="spell"></param>
     public IEnumerator DamageRoutine(int damage, SpellSO spell, bool AI)
     {
         yield return new WaitForSeconds(0.3f);
@@ -454,6 +496,11 @@ public class SpellCasterOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Takes in a spell and subtracts the appropriate amount of mana for that spells cost - AI bool determines whether to do this for human player or AI palyer
+    /// </summary>
+    /// <param name="spell"></param>
+    /// <param name="AI"></param>
     private void PayMana(SpellSO spell, bool AI)
 	{
         if (!AI)
@@ -480,6 +527,14 @@ public class SpellCasterOffline : MonoBehaviour
         }
 	}
 
+    /// <summary>
+    /// Rolls to see if the spell successfully poisoned or butned the player
+    /// </summary>
+    /// <param name="chance"></param>
+    /// <param name="type"></param>
+    /// <param name="hitMe"></param>
+    /// <param name="spell"></param>
+    /// <returns></returns>
     private IEnumerator CheckDot(int chance, string type, bool AI, SpellSO spell)
     {
         yield return new WaitForSeconds(1);
@@ -536,6 +591,10 @@ public class SpellCasterOffline : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Run whenever a counter is triggered
+    /// </summary>
+    /// <param name="AI"></param>
     public void Counter(bool AI)
     {
         if (AI)
@@ -582,6 +641,11 @@ public class SpellCasterOffline : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Sets appropriate stat and end locations for projectile
+    /// </summary>
+    /// <param name="_projectile"></param>
+    /// <param name="AI"></param>
     public void LaunchProjectile(string _projectile, bool AI)
     {
         if (_projectile == "Reap" || _projectile == "HarvestSoul")
@@ -614,6 +678,14 @@ public class SpellCasterOffline : MonoBehaviour
         StartCoroutine(Projectile(projectileStart, projectileEnd, _projectile, AI));
     }
 
+    /// <summary>
+    /// Launches a _projectile prefab starting at specified start location that ends at specified end location 
+    /// </summary>
+    /// <param name="_projectileStart"></param>
+    /// <param name="_projectileEnd"></param>
+    /// <param name="_projectile"></param>
+    /// <param name="AI"></param>
+    /// <returns></returns>
     public IEnumerator Projectile(Vector3 _projectileStart, Vector3 _projectileEnd, string _projectile, bool AI)
     {
         if (!AI)
@@ -635,6 +707,10 @@ public class SpellCasterOffline : MonoBehaviour
         temp.transform.LookAt(_projectileEnd);
     }
 
+    /// <summary>
+    /// Plays spell effect animation (specified by effect string) at opponents location
+    /// </summary>
+    /// <param name="effect"></param>
     public void TheirLocationEffect(string effect, bool AI)
     {
         if(!AI)
@@ -645,6 +721,11 @@ public class SpellCasterOffline : MonoBehaviour
         StartCoroutine(StationaryEffect(effect, AI));
     }
 
+    /// <summary>
+    /// Plays spell effect animation (specified by effect string) at local players location - sends a message to mimic this on opponents screen
+    /// </summary>
+    /// <param name="effect"></param>
+    /// <param name="AI"></param>
     public void MyLocationEffect(string effect, bool AI)
     {
         if (!AI)
@@ -655,6 +736,12 @@ public class SpellCasterOffline : MonoBehaviour
         StartCoroutine(StationaryEffect(effect, AI));
     }
 
+    /// <summary>
+    /// Plays an animation in at a target location
+    /// </summary>
+    /// <param name="effect"></param>
+    /// <param name="AI"></param>
+    /// <returns></returns>
     public IEnumerator StationaryEffect(string effect, bool AI)
     {
         if (!AI)

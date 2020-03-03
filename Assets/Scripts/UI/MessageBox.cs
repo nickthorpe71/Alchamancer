@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Multiplayer Version - Allows the user to interract with the dialogue box
+/// </summary>
 public class MessageBox : MonoBehaviour
 {
     public GameObject tapToClose;

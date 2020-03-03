@@ -4,16 +4,19 @@ using UnityEngine;
 using UnityEngine.UI;
 using Photon.Pun;
 
+/// <summary>
+/// Multiplayer Version - Handles both players Attack, Defense and HP
+/// </summary>
 public class StatsManager : MonoBehaviourPunCallbacks
 {
 
     [Header("General")]
-    public static StatsManager instance;
+    public static StatsManager instance; //Allows this script to be easily accessable from other scripts
     public SpellCaster spellCaster;
-    public int attDefIncrement = 15;
     private GameManager gameManager;
     private SaveLoad saveLoad;
 
+    //UI display elements for player one
     [Header("P1")]
     public Text p1Name;
     public Text p1RP;
@@ -21,6 +24,7 @@ public class StatsManager : MonoBehaviourPunCallbacks
     public GameObject p1PsnObj;
     public GameObject p1BrnObj;
 
+    //UI display elements for player two
     [Header("P2")]
     public Text p2Name;
     public Text p2RP;
@@ -28,6 +32,7 @@ public class StatsManager : MonoBehaviourPunCallbacks
     public GameObject p2PsnObj;
     public GameObject p2BrnObj;
 
+    //UI display elements for local player
     [Header("MyStats")]
     public Text myName;
     public Text myRP;
@@ -42,6 +47,7 @@ public class StatsManager : MonoBehaviourPunCallbacks
     public GameObject myBrnObj;
     public bool myCounter;
 
+    //UI display elements for other player
     [Header("TheirStats")]
     public Text theirName;
     public Text theirRP;
@@ -64,6 +70,7 @@ public class StatsManager : MonoBehaviourPunCallbacks
         gameManager = GameManager.instance;
         saveLoad = SaveLoad.instance;
 
+        //Set all UI to appropriate player depending on which player is the master client
         if (!saveLoad.tournamentHost)
         {
             myHP = myHPMax;
@@ -98,6 +105,7 @@ public class StatsManager : MonoBehaviourPunCallbacks
                 theirBrnObj = p1BrnObj;
             }
 
+            //Populate values in UI fields for local player
             myBar.MaxValue = myHPMax;
             myBar.SetValue(myHP);
             theirBar.MaxValue = theirHPMax;
@@ -110,6 +118,9 @@ public class StatsManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Sends local players name and rank points to other player and tournament host
+    /// </summary>
     void SetNamesAndLevels()
     {
         if (!saveLoad.tournamentHost)
@@ -121,6 +132,12 @@ public class StatsManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Receives other players name and rank points
+    /// </summary>
+    /// <param name="_theirName"></param>
+    /// <param name="_theirRP"></param>
+    /// <param name="theirRPInt"></param>
     [PunRPC]
     void RPC_SetNamesAndLevels(string _theirName, string _theirRP, int theirRPInt)
     {
@@ -133,7 +150,11 @@ public class StatsManager : MonoBehaviourPunCallbacks
     }
 
 
-    //Health Mods
+    /// <summary>
+    /// Used to alter the health of the local player and sends the updated health to the other player - amount can be positive or negative
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="psnOrBurn"></param>
     public void MyHealth(int amount, bool psnOrBurn)
     {
         if (!saveLoad.tournamentHost)
@@ -150,7 +171,11 @@ public class StatsManager : MonoBehaviourPunCallbacks
         }
     }
 
-
+    /// <summary>
+    /// Receives the updated health for other player from the other player
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="psnOrBurn"></param>
     [PunRPC]
     private void RPC_MyHealth(int amount, bool psnOrBurn)
     {
@@ -161,6 +186,11 @@ public class StatsManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Used to alter the health of the other player and sends the updated health to the other player - amount can be positive or negative
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="psnOrBurn"></param>
     public void TheirHealth(int amount, bool psnOrBurn)
     {
         if (!saveLoad.tournamentHost)
@@ -179,6 +209,11 @@ public class StatsManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Receives the updated health for local player from the other player
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="psnOrBurn"></param>
     [PunRPC]
     private void RPC_TheirHealth(int amount, bool psnOrBurn)
     {
@@ -203,6 +238,13 @@ public class StatsManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Takes in the amount that health should be altered by and makes sure health does not go above max health
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="currentHP"></param>
+    /// <param name="maxHP"></param>
+    /// <returns></returns>
     int CalculateAmount(int amount, int currentHP, int maxHP)
     {
         if (amount > 0)
@@ -225,18 +267,33 @@ public class StatsManager : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Used to send a change of a "stat" of the local player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     public void MyStat(string stat, int amount)
     {
         MyStatAdjust(stat, amount);
-        base.photonView.RPC("RPC_TheirStat", RpcTarget.Others, stat, amount);
+        base.photonView.RPC("RPC_TheirStat", RpcTarget.Others, stat, amount); //Sends the updated stat to the other player
     }
 
+    /// <summary>
+    /// Receives a message to change other players stat
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     [PunRPC]
     public void RPC_TheirStat(string stat, int amount)
     {
         TheirStatAdjust(stat, amount);
     }
 
+    /// <summary>
+    /// Used to send a change of a  "stat" of the other player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     public void TheirStat(string stat, int amount)
     {
         TheirStatAdjust(stat, amount);
@@ -244,12 +301,22 @@ public class StatsManager : MonoBehaviourPunCallbacks
         base.photonView.RPC("RPC_MyStat", RpcTarget.Others, stat, amount);
     }
 
+    /// <summary>
+    /// Receives a message to change local players stat
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     [PunRPC]
     public void RPC_MyStat(string stat, int amount)
     {
         MyStatAdjust(stat, amount);
     }
 
+    /// <summary>
+    /// Alters a "stat" of the other player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     private void TheirStatAdjust(string stat, int amount)
     {
         if (!saveLoad.tournamentHost)
@@ -281,14 +348,14 @@ public class StatsManager : MonoBehaviourPunCallbacks
                 theirAttack += amount;
             if (stat == "Defense")
                 theirDefense += amount;
-
-            /*if (amount < 0)
-                gameManager.DisplayMessage(theirName.text + "'s " + stat + " was reduced by " + amount);
-            else
-                gameManager.DisplayMessage(theirName.text + "'s " + stat + " raised by " + amount);*/
         }
     }
 
+    /// <summary>
+    /// Alters a "stat" of the local player (attack/defense/) by an amount - amount can be negative or positive
+    /// </summary>
+    /// <param name="stat"></param>
+    /// <param name="amount"></param>
     private void MyStatAdjust(string stat, int amount)
     {
         if (!saveLoad.tournamentHost)

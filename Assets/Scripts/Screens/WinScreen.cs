@@ -3,21 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Main script for screen were players are taken after winning a match 
+/// </summary>
 public class WinScreen : MonoBehaviour
 {
+    //UI display text fields
     public Text playerName;
     public Text playerRP;
     public Text addedRPTxt;
 
     private SaveLoad saveLoad;
 
-    public AudioClip sceneTrack;
+    public AudioClip sceneTrack; //Music played on this scene
 
     public bool rankedUp;
     public GameObject rankedObj;
     public GameObject arrow;
 
-    public List<GameObject> skins = new List<GameObject>();
+    public List<GameObject> skins = new List<GameObject>(); //All potential character skins
     private int currentSkin;
 
     private int startRP;
@@ -51,6 +55,12 @@ public class WinScreen : MonoBehaviour
         StartCoroutine(IncrementRP());
     }
 
+    /// <summary>
+    /// Uses the opponents Rank Points (RP) and players RP to calculate the amount of RP won - uses ELO calculation
+    /// </summary>
+    /// <param name="myRP"></param>
+    /// <param name="opponentRP"></param>
+    /// <returns></returns>
     int CalculateFinalRP(int myRP, int opponentRP)
     {
         float exponent = (opponentRP - myRP) / 400f;
@@ -68,6 +78,10 @@ public class WinScreen : MonoBehaviour
         return Mathf.RoundToInt(newRP);
     }
 
+    /// <summary>
+    /// Decreases the players rank points rapidly 
+    /// </summary>
+    /// <returns></returns>
     IEnumerator IncrementRP()
     {
         while(currentRP < finalRP)
@@ -91,6 +105,9 @@ public class WinScreen : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the appropriate character skin image
+    /// </summary>
     private void CheckSkinImage()
     {
         foreach (GameObject skin in skins)
@@ -101,17 +118,26 @@ public class WinScreen : MonoBehaviour
         skins[currentSkin].SetActive(true);
     }
 
+    /// <summary>
+    /// Sends updated Rank Points to the databse
+    /// </summary>
     public void UpdateLeaderboards()
     {
         Database.AddNewRow(saveLoad.playerName, saveLoad.playerRP, 0, SystemInfo.deviceUniqueIdentifier);
     }
 
+    /// <summary>
+    /// Sends user to the main menu
+    /// </summary>
     public void LeaveEarly()
     {
         UpdateLeaderboards();
         SceneSelect.instance.MainMenuButton();
     }
 
+    /// <summary>
+    /// Sends user to the leaderboards page
+    /// </summary>
     public void LeaveEarlyToLeaderboards()
     {
         UpdateLeaderboards();

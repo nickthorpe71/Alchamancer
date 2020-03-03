@@ -5,42 +5,40 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.UI;
 
+/// <summary>
+/// Multiplayer Version - Handles movement controls and movement animation for the player object
+/// </summary>
 public class PlayerControl : MonoBehaviourPunCallbacks
 {
-    private Vector3 fp;   //First touch position
-    private Vector3 lp;   //Last touch position
-    private float dragDistance;  //minimum distance for a swipe to be registered
-
     SaveLoad saveLoad;
 
     [Header("Player")]
-    public string screenName;
-    public GameObject redMask;
-    public GameObject blueMask;
+    public string screenName; //UI display for local players username
+    public GameObject redMask; //A marker to distinguish which player belongs to local player
+    public GameObject blueMask; //A marker to distinguish which player belongs to local player
 
     [Header("Movement")]
-    public Vector3 source;
-    public bool canMove;
+    public bool canMove; //To easily stop movement
     public Vector3 startPosition;
-    public bool spiritWalk;
+    public bool spiritWalk; //Whether player has spirit walk effect active
     public GameObject upButton;
     public GameObject downButton;
     public GameObject leftButton;
     public GameObject rightButton;
 
     [Header("Target")]
-    public Vector3 targetPos;
-    public GameObject targetObj;
+    public Vector3 targetPos; //The grid position currently targeted
+    public GameObject targetObj; //The object that is in the target position
 
     [Header("Animation")]
-    public GameObject currentSprite;
-    public List<GameObject> spriteList = new List<GameObject>();
-    [HideInInspector] public Animator animator;
-    public GameObject spiritWalkEffect;
+    public GameObject currentSprite; //The active character skin sprite
+    public List<GameObject> spriteList = new List<GameObject>(); //A list of all possible character skin sprites
+    [HideInInspector] public Animator animator; //The animator of the current character skin sprite
+    public GameObject spiritWalkEffect; //Particle effect object to be activated when spirit walk spell is active
 
     [Header("Health")]
-    public bool poisoned;
-    public bool burnt;
+    public bool poisoned; //Whether or not this player is poisoned
+    public bool burnt; //Whether or not this player is burnt
 
     [Header("Managers")]
     private Terraform terraformScript;
@@ -56,13 +54,10 @@ public class PlayerControl : MonoBehaviourPunCallbacks
     public bool facingRight = false;
 
     [Header("SFX")]
-    public AudioClip moveSound;
+    public AudioClip moveSound; //Sound playen when moving tile to tile
 
     [Header("Networking")]
     public PhotonView PV;
-
-    [Header("AI")]
-    private AIController aiController;
 
     private void Awake()
     {
@@ -73,14 +68,10 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         gameManager = GameManager.instance;
         cellManager = CellManager.instance;
 
-        aiController = GetComponent<AIController>();
-
-        if (PV.IsMine)
+        
+        if (PV.IsMine) //Check that this PlayerControl script belongs to the local player
         {
-            if (Carry.instance.aIAcvive)
-                aiController.enabled = true;
-
-            currentSprite = spriteList[SaveLoad.instance.characterSkin];
+            currentSprite = spriteList[SaveLoad.instance.characterSkin]; //Select the character skin sprite for local player
 
             transform.parent.name = "My player";
             gameManager.myPlayer = this.gameObject;
@@ -90,7 +81,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         }
         else
         {
-            currentSprite = spriteList[gameManager.otherPlayerSkin];
+            currentSprite = spriteList[gameManager.otherPlayerSkin]; //Select the character skin sprite for other player(s)
 
             transform.parent.name = "Their player";
             gameManager.theirPlayer = this.gameObject;
@@ -99,6 +90,7 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         currentSprite.SetActive(true);
         animator = currentSprite.GetComponent<Animator>();
 
+        //Determines which player goes first by which one is the master client
         if (!PhotonNetwork.IsMasterClient)
         {
             AnimBoolFalse();
@@ -127,20 +119,21 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        dragDistance = Screen.height * 8 / 100;
-
         transform.parent.transform.position = startPosition;
 
         terraformScript = GetComponent<Terraform>();
         statsManager = StatsManager.instance;
         soundManager = SoundManager.instance;
 
+        //Set targetObj to the element in front of player using masterGrid in CellManager
         cellManager.masterGrid.TryGetValue(targetPos, out targetObj);
 
+        //Pass targetObj to Terraform script target
         terraformScript.target = targetObj;
 
         if (PV.IsMine)
         {
+            //Set all UI buttons to apropriate functions
             upButton = GameObject.FindGameObjectWithTag("UpButton");
             upButton.GetComponent<Button>().onClick.AddListener(delegate { MoveUp(); });
 
@@ -157,22 +150,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     }
 
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            AnimBoolFalse();
-
-            if (blueMask.activeSelf)  
-                animator.SetBool("Death", true);
-            else
-                animator.SetBool("Win", true);
-        }
-
-    }
-
-
+    /// <summary>
+    /// Moves the player up if they are facing up otherwise faces them up
+    /// </summary>
     public void MoveUp()
     {
         Debug.Log("MoveUp");
@@ -206,6 +186,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         terraformScript.target = targetObj;
     }
 
+    /// <summary>
+    /// Moves the player down if they are facing up otherwise faces them down
+    /// </summary>
     public void MoveDown()
     {
 
@@ -240,6 +223,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         terraformScript.target = targetObj;
     }
 
+    /// <summary>
+    /// Moves the player left if they are facing up otherwise faces them left
+    /// </summary>
     public void MoveLeft()
     {
         targetPos = new Vector3(transform.position.x - 1, transform.position.y, 0);
@@ -270,6 +256,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         terraformScript.target = targetObj;
     }
 
+    /// <summary>
+    /// Moves the player right if they are facing up otherwise faces them right
+    /// </summary>
     public void MoveRight()
     {
         targetPos = new Vector3(transform.position.x + 1, transform.position.y, 0);
@@ -299,29 +288,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         terraformScript.target = targetObj;
     }
 
-    public void KeyboardControls()
-    {    
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            MoveUp();
-        }
-
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            MoveDown();
-        }
-
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            MoveLeft();
-        }
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            MoveRight();
-        }
-    }
-
+    /// <summary>
+    /// Sets all facing direction bools in animator to false
+    /// </summary>
     public void AnimBoolFalse()
     {
         animator.SetBool("FaceFront", false);
@@ -330,6 +299,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         animator.SetBool("FaceRight", false);
     }
 
+    /// <summary>
+    /// Sets all facing direction bools in this PlayerControl to false
+    /// </summary>
     public void FacingBoolReset()
     {
         facingBack = false;
@@ -338,12 +310,18 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         facingFront = false;
     }
 
+    /// <summary>
+    /// Grouping of things to be done on every movement
+    /// </summary>
     public void MovePosition()
     {
         soundManager.PlaySingle(moveSound, 1);
         transform.position = targetPos;
     }
 
+    /// <summary>
+    /// Function to check if the player is poisoned or burnt at the end of each turn - if so it also sends a message to remove health
+    /// </summary>
     public void DoT()
     {
         if (poisoned)
@@ -358,6 +336,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Returns true if the space we are trying to move to is already occupied by another player
+    /// </summary>
     public bool OtherPlayerCheck()
     {
         if (targetPos == gameManager.theirPlayer.transform.position)
@@ -367,22 +348,34 @@ public class PlayerControl : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Refills energy at the beginning of each turn
+    /// </summary>
     public void NextTurn()
     {
         terraformScript.energy = 4;
         terraformScript.CheckEnergy();
     }
 
+    /// <summary>
+    /// Sets burnt bool to false
+    /// </summary>
     public void UnBurn()
     {
         burnt = false;
     }
 
+    /// <summary>
+    /// Sets poisoned bool to false
+    /// </summary>
     public void UnPoision()
     {
 		poisoned = false;
 	}
 
+    /// <summary>
+    /// Turns spirit walk on and off
+    /// </summary>
     public void SpiritWalk()
     {
         if(spiritWalk)
@@ -397,6 +390,9 @@ public class PlayerControl : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Sends message to other player that local player has changed status of spirit walk
+    /// </summary>
     [PunRPC]
     public void RPC_SpiritWalk()
     {

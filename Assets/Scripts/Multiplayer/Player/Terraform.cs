@@ -11,6 +11,7 @@ public class Terraform : MonoBehaviourPunCallbacks
     private SoundManager soundManager;
 
     [Header("Elements")]
+    //UI Display count for all elements
     public int waterCount;
     public int plantCount;
     public int fireCount;
@@ -18,14 +19,15 @@ public class Terraform : MonoBehaviourPunCallbacks
     public int lifeCount;
     public int deathCount;
     public GameObject takeCast;
+    //Prefabs for all elements
     public GameObject dirt, water, plant, fire, rock, life, death;
 
     [Header("Player")]
     private PlayerControl playerCon;
     public GameObject target;
-    public bool canTake;
-    public float castSpeed = 0.4f;
-    private GameObject temp;
+    public bool canTake; //Whether this player can collect elements
+    public float castSpeed = 0.4f; //Time before player can collect again
+    private GameObject temp; 
     public Animator animator;
     public SpellSO antidoteSpell;
     
@@ -78,6 +80,9 @@ public class Terraform : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Uses the masterGrid in CellManager to determine what is the target position
+    /// </summary>
     public void DetermineTarget()
     {
         Vector3 relativePos = transform.position;
@@ -92,6 +97,10 @@ public class Terraform : MonoBehaviourPunCallbacks
             target = cellManager.masterGrid[new Vector3(relativePos.x + 1, relativePos.y, relativePos.z)];
     }
 
+    /// <summary>
+    /// Main function for collecting elements - Uses bool eatMana to see if we are collecting or eating the target element
+    /// </summary>
+    /// <param name="eatMana"></param>
     public void Take(bool eatMana)
     {
         if (playerCon.PV.IsMine)
@@ -185,6 +194,10 @@ public class Terraform : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Grouping of things that need to be done after the Take function is run
+    /// </summary>
+    /// <param name="eatMana"></param>
     public void PostTake(bool eatMana)
     {
         soundManager.PlaySinglePublic("takeSound", 0.8f);
@@ -205,6 +218,7 @@ public class Terraform : MonoBehaviourPunCallbacks
 
         Quaternion castRotation = Quaternion.Euler(0, 0, 0);
 
+        //Determine rotation of post take animation
         temp = Instantiate(takeCast, target.transform.position, Quaternion.identity);
         if (playerCon.facingBack)
             castRotation = Quaternion.Euler(90, 0, 0);
@@ -220,6 +234,11 @@ public class Terraform : MonoBehaviourPunCallbacks
         base.photonView.RPC("SpawnTakeCastOther", RpcTarget.Others, target.transform.position, castRotation);
     }
 
+    /// <summary>
+    /// Sends a message to play the post take animation for this player on other players screens
+    /// </summary>
+    /// <param name="position"></param>
+    /// <param name="rotation"></param>
     [PunRPC]
     public void SpawnTakeCastOther(Vector3 position, Quaternion rotation)
     {
@@ -227,6 +246,9 @@ public class Terraform : MonoBehaviourPunCallbacks
         temp.transform.GetChild(0).transform.rotation = rotation;
     }
 
+    /// <summary>
+    /// Uses direction bools to decide which cast animation to play
+    /// </summary>
     public void Cast()
     {
         if (playerCon.facingFront)
@@ -240,6 +262,10 @@ public class Terraform : MonoBehaviourPunCallbacks
         StartCoroutine(CastRoutine());
     }
 
+    /// <summary>
+    /// Uses castSpeed to delay the player after they collect an element
+    /// </summary>
+    /// <returns></returns>
     public IEnumerator CastRoutine()
     {
         playerCon.canMove = false;
@@ -247,6 +273,9 @@ public class Terraform : MonoBehaviourPunCallbacks
         playerCon.canMove = true;
     }
 
+    /// <summary>
+    /// Plays cast animation facing forward
+    /// </summary>
     public void CastFront()
     {
         ResetAnim();
@@ -255,6 +284,9 @@ public class Terraform : MonoBehaviourPunCallbacks
         base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
 
+    /// <summary>
+    /// Plays cast animation facing backward
+    /// </summary>
     public void CastBack()
     {
         ResetAnim();
@@ -262,6 +294,10 @@ public class Terraform : MonoBehaviourPunCallbacks
         animator.SetTrigger(trigger);
         base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
+
+    /// <summary>
+    /// Plays cast animation facing left
+    /// </summary>
     public void CastLeft()
     {
         ResetAnim();
@@ -269,20 +305,32 @@ public class Terraform : MonoBehaviourPunCallbacks
         animator.SetTrigger(trigger);
         base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
+
+    /// <summary>
+    /// Plays cast animation facing right
+    /// </summary>
     public void CastRight()
     {
         ResetAnim();
         string trigger = "CastRight";
         animator.SetTrigger(trigger);
+        // Sends a message to play cast animation specified by trigger on opponents screen
         base.photonView.RPC("OtherCastAnim", RpcTarget.Others, trigger);
     }
 
+    /// <summary>
+    /// Receives a message to play cast animation specified by trigger on opponents player object
+    /// </summary>
+    /// <param name="trigger"></param>
     [PunRPC]
     public void OtherCastAnim(string trigger)
     {
         gameManager.theirPlayer.GetComponent<PlayerControl>().currentSprite.GetComponent<Animator>().SetTrigger(trigger);
     }
 
+    /// <summary>
+    /// Resets cast animation triggers
+    /// </summary>
     public void ResetAnim()
     {
         animator.ResetTrigger("CastFront");
@@ -291,6 +339,9 @@ public class Terraform : MonoBehaviourPunCallbacks
         animator.ResetTrigger("CastRight");
     }
 
+    /// <summary>
+    /// Use after adjusting energy to make sure energy display images are reflecting current energy
+    /// </summary>
     public void CheckEnergy()
     {
         
@@ -316,6 +367,9 @@ public class Terraform : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Use after adjusting mana to make sure mana display images are reflecting current mana
+    /// </summary>
     public void CheckMana()
     {
 

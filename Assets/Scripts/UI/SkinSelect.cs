@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Allows user to change their character skin
+/// </summary>
 public class SkinSelect : MonoBehaviour
 {
-    public List<GameObject> skins = new List<GameObject>();
+    public List<GameObject> skins = new List<GameObject>(); //List of all skins
     public List<bool> availability = new List<bool>();
 
     public Image visibleSkin;
@@ -14,7 +17,6 @@ public class SkinSelect : MonoBehaviour
     private SaveLoad saveLoad;
 
     public GameObject selectButton;
-    //public GameObject buyButton;
     public GameObject rightButton;
     public GameObject leftButton;
 
@@ -35,6 +37,9 @@ public class SkinSelect : MonoBehaviour
             rightButton.SetActive(false);
     }
 
+    /// <summary>
+    /// switches displayed skin to the previous in skins list
+    /// </summary>
     public void ChangeSkinLeft()
     {
         SoundManager.instance.PlayButtonClick();
@@ -50,6 +55,9 @@ public class SkinSelect : MonoBehaviour
             leftButton.SetActive(false);
     }
 
+    /// <summary>
+    /// switches displayed skin to the next in skins list
+    /// </summary>
     public void ChangeSkinRight()
     {
         SoundManager.instance.PlayButtonClick();
@@ -65,25 +73,20 @@ public class SkinSelect : MonoBehaviour
             rightButton.SetActive(false);
     }
 
+    /// <summary>
+    /// Sets the "select" button to active if this is not the players current skin else sets "select" button to inactive
+    /// </summary>
     private void CheckButtons()
     {
         if (currentSkin == saveLoad.characterSkin)
             selectButton.SetActive(false);
         else
             selectButton.SetActive(true);
-
-        /*if (saveLoad.skinAvailability[currentSkin] == true)
-        {
-            buyButton.SetActive(false);
-        }
-        else
-        {
-            buyButton.SetActive(true);
-            selectButton.SetActive(false);
-
-        }*/
     }
 
+    /// <summary>
+    /// Displays the appropriate skin from the kins list
+    /// </summary>
     private void CheckSkinImage()
     {
         foreach(GameObject skin in skins)
@@ -94,6 +97,9 @@ public class SkinSelect : MonoBehaviour
         skins[currentSkin].SetActive(true);
     }
 
+    /// <summary>
+    /// Sets whichever skin is being displayed as the players current skin
+    /// </summary>
     public void SelectSkin()
     {
         SoundManager.instance.PlayButtonClick();
@@ -104,11 +110,12 @@ public class SkinSelect : MonoBehaviour
         saveLoad.Save();
     }
 
+    /// <summary>
+    /// Allows player to purchase the dispalyed skin
+    /// </summary>
     public void BuySkin()
     {
         SoundManager.instance.PlayButtonClick();
-
-        //buyButton.SetActive(false);
         selectButton.SetActive(true);
 
         saveLoad.skinAvailability[currentSkin] = true;

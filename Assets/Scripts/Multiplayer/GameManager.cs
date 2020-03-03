@@ -6,57 +6,61 @@ using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Multiplayer - Manages flow of each match - primarily turns, wins/loses and messaging
+/// </summary>
 public class GameManager : MonoBehaviourPunCallbacks 
 {
     [Header("General")]
-    public static GameManager instance;
-    public Animator cameraAnim;
-    [HideInInspector] public Terraform terraScript;
-    [HideInInspector] public PlayerControl playerControl;
-    private SoundManager soundManager;
-    private bool canWin = true;
+    public static GameManager instance; //Allows this script to be referenced easily from other scrips in scene
+    public Animator cameraAnim; //Animator for screen shake
+    [HideInInspector] public Terraform terraScript; //Reference to local players Terraform script
+    [HideInInspector] public PlayerControl playerControl; //Reference to local players PlayerControl script
+    private SoundManager soundManager; //Reference to the SoundManager
+    private bool canWin = true; //Whether local player cna win currently
     public bool gameStarted;
-    public int turnCounter;
+    public int turnCounter; //Counts which turn is curently being played
 
     [Header("Players")]
-    public List<GameObject> players = new List<GameObject>();
-    public GameObject myPlayer;
-    public GameObject theirPlayer;
-    public GameObject[] energyImages;
-    public GameObject[] manaImages;
+    public List<GameObject> players = new List<GameObject>(); //List of all players
+    public GameObject myPlayer; //Local player object
+    public GameObject theirPlayer; //Opponents player object
+    public GameObject[] energyImages; //Display imaages for local player energy
+    public GameObject[] manaImages; //Display imaages for local player mana
     public bool myTurn;
-    public bool collectPhase;
-    public int otherPlayerSkin;
-    public int otherPlayerRP;
+    public int otherPlayerSkin; //Int of which skin the other player is using so it can be reflected in local instance of the game
+    public int otherPlayerRP; //Store other players Rank Points to determine final score
 
     [Header("TurnTimer")]
     private int timePerTurn = 90;
     private int timeRemaining;
-    public GameObject timer;
+    public GameObject timer; //So timer can be set active and inactive
     public Text timerText;
     private bool timing;
     private float elapsedTime;
 
     [Header("Spells")]
-    public SpellCaster spellCaster;
-    public SpellSO currentSpell;
+    public SpellCaster spellCaster; 
+    public SpellSO currentSpell; //Used to hold the current spell being cast
 
     [Header("UI")]
-    public GameObject dialogueTextObj;
-    public GameObject dialogueBox;
-    public List<string> dialogueList = new List<string>();
-    public GameObject toolTipObj;
+    public GameObject dialogueTextObj; //To access actual text in dialogue box
+    public GameObject dialogueBox; //To set dialogue box active and inactive
+    public List<string> dialogueList = new List<string>(); //List of pending dialogue
+    public GameObject toolTipObj; //To set tool tip active and inactive
     public Text toolName;
     public Text toolText;
     public Text toolPow;
     public List<Button> buttons = new List<Button>();
+    //Local players UI display count of each element
     public Text waterCount;
     public Text plantCount;
     public Text fireCount;
     public Text rockCount;
     public Text lifeCount;
     public Text deathCount;
-    public Button infoYesButton;
+    
+    public Button infoYesButton; //The button that casts from within the tooltip
 
     [Header("Info From LevelSO")]
     public LevelSO levelInfo;
@@ -69,7 +73,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public AudioClip closeMessageSound;
 
     [Header("Music")]
-    public AudioClip[] tracks;
+    public AudioClip[] tracks; //All possible battle music tracks
 
     void Awake()
     {
@@ -83,11 +87,11 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        PhotonNetwork.KeepAliveInBackground = 300;
+        PhotonNetwork.KeepAliveInBackground = 300; //Set the amount of time the network connection should be maintained if player minimizes app
 
         soundManager = SoundManager.instance;
         soundManager.gameManager = this;
-        soundManager.RandomizeMusic(tracks);
+        soundManager.RandomizeMusic(tracks); 
 
         if (!SaveLoad.instance.tournamentHost)
         {
@@ -103,6 +107,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Sets the player who is the master client to take first turn and starts the game
+    /// </summary>
     private void Setup()
     {
         if (PhotonNetwork.IsMasterClient)
@@ -128,29 +135,49 @@ public class GameManager : MonoBehaviourPunCallbacks
             CountDownUpdate();
     }
 
+    /// <summary>
+    /// Sends local players skin int to other players
+    /// </summary>
     public void TransferPlayerSkin()
     {
         int skin = SaveLoad.instance.characterSkin;
         base.photonView.RPC("RPC_TransferPlayerSkin", RpcTarget.OthersBuffered, skin);
     }
 
+    /// <summary>
+    /// Receives skin int from otehr players
+    /// </summary>
+    /// <param name="skin"></param>
     [PunRPC]
     public void RPC_TransferPlayerSkin(int skin)
     {
         otherPlayerSkin = skin;
     }
 
+    /// <summary>
+    /// Sends a clip by name and the volume it should be played at to other players 
+    /// </summary>
+    /// <param name="clipName"></param>
+    /// <param name="volume"></param>
     public void PlayPublicSingle(string clipName, float volume)
     {
         base.photonView.RPC("RPC_PlaySinglePublic", RpcTarget.All, clipName, volume);
     }
 
+    /// <summary>
+    /// Receives audio clip by name from other players and plays it at specified volume through SoundManager
+    /// </summary>
+    /// <param name="clipName"></param>
+    /// <param name="volume"></param>
     [PunRPC]
     public void RPC_PlaySinglePublic(string clipName, float volume)
     {
         soundManager.RPC_PlaySinglePublic(clipName, volume);
     }
 
+    /// <summary>
+    /// Run in update to reduce turn timer
+    /// </summary>
     private void CountDownUpdate()
     {
         if (timeRemaining > 0)
@@ -172,6 +199,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Ends local players turn and sends message to other player to start their turn
+    /// </summary>
     public void NextTurn()
     {
         if (myTurn && !SaveLoad.instance.tournamentHost)
@@ -192,6 +222,11 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Spawns numberOfSpawns int amount of new elements through CellManager
+    /// </summary>
+    /// <param name="numberOfSpawns"></param>
+    /// <returns></returns>
     public IEnumerator SpawnRandom(int numberOfSpawns)
     {
         yield return new WaitForSeconds(2f);
@@ -204,12 +239,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Receives a message to run TurnFalse function for local player
+    /// </summary>
     [PunRPC]
     private void RPC_TurnFalse()
     {
         TurnFalse();
     }
 
+    /// <summary>
+    /// Receives a message to run TurnTrue function for local player and increase turnCounter
+    /// </summary>
     [PunRPC]
     private void RPC_TurnTrue()
     {
@@ -217,6 +258,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         turnCounter++;
     }
 
+    /// <summary>
+    /// Starts local players turn
+    /// </summary>
     void TurnTrue()
     {
         if (!SaveLoad.instance.tournamentHost)
@@ -237,6 +281,9 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Needs tobe run at end of local players turn to stop movement etc
+    /// </summary>
     void TurnFalse()
     {
         if (!SaveLoad.instance.tournamentHost)
@@ -255,17 +302,26 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Sends a message to play camera shake for all players including local player
+    /// </summary>
     public void CameraShake()
     {
         base.photonView.RPC("RPC_CameraShake", RpcTarget.All);
     }
 
+    /// <summary>
+    /// Receives a message to play camera shake for local player
+    /// </summary>
     [PunRPC]
     public void RPC_CameraShake()
     {
         cameraAnim.SetTrigger("Shake");
     }
 
+    /// <summary>
+    /// Updates all element count display numbers
+    /// </summary>
     public void UpdateElements()
     {
         waterCount.text = terraScript.waterCount.ToString();
@@ -276,6 +332,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         deathCount.text = terraScript.deathCount.ToString();
     }
 
+    /// <summary>
+    /// Displays a message - specified by string dialogue - on screen for local player only
+    /// </summary>
+    /// <param name="dialogue"></param>
     public void DisplayMessage(string dialogue)
     {
         if (!SaveLoad.instance.tournamentHost)
@@ -297,22 +357,36 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Sends a message to display an on screen message box containing parameter string to all players including local player
+    /// </summary>
+    /// <param name="message"></param>
     public void DisplayPublicMessage(string message)
     {
         base.photonView.RPC("RPC_DisplayPublicMessage", RpcTarget.All, message);
     }
 
+    /// <summary>
+    /// Receives message to display an on screen message box containing parameter string for local player
+    /// </summary>
+    /// <param name="message"></param>
     [PunRPC]
     public void RPC_DisplayPublicMessage(string message)
     {
         DisplayMessage(message);
     }
 
+    /// <summary>
+    /// Starts routine that closes current message
+    /// </summary>
     public void CloseMessage()
     {
         StartCoroutine(CloseMessageRoutine());
     }
 
+    /// <summary>
+    /// Closes current message and displays next message if there is one else closes dialogue box
+    /// </summary>
     IEnumerator CloseMessageRoutine()
     {
         soundManager.PlaySingle(closeMessageSound, 1);
@@ -339,6 +413,12 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Displays tool tip box with info from selected spell
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="message"></param>
+    /// <param name="pow"></param>
     public void DisplayToolTip (string name, string message, string pow)
     {
         playerControl.canMove = false;
@@ -351,12 +431,18 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Closes tool tip
+    /// </summary>
     public void CloseToolTipNo()
     {
         toolTipObj.SetActive(false);
         soundManager.PlaySingle(closeMessageSound, 1);
     }
 
+    /// <summary>
+    /// Closes tool tip and casts the specified spell
+    /// </summary>
     public void CloseToolTipYes()
     {
         toolTipObj.SetActive(false);
@@ -371,6 +457,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Runs if local player quits to main menu before the end of the match - records a loss for local player and a win for opponent(s)
+    /// </summary>
     public void RageQuit()
     {
         if (!SaveLoad.instance.tournamentHost)
@@ -396,12 +485,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Starts LoseRoutine for local player and sends message to start WinRoutine for opponent(s)
+    /// </summary>
     public void GameOver()
     {
         base.photonView.RPC("RPC_WinRoutine", RpcTarget.Others);
         StartCoroutine(LoseRoutine());
     }
 
+    /// <summary>
+    /// Receive message to start the lose routine for local player
+    /// </summary>
     [PunRPC]
     public void RPC_LoseRoutine()
     {
@@ -409,17 +504,22 @@ public class GameManager : MonoBehaviourPunCallbacks
             StartCoroutine(LoseRoutine());
     }
 
+    /// <summary>
+    /// Handles ending the match for local player and calculates a loss for them
+    /// </summary>
     public IEnumerator LoseRoutine()
     {
         if (!SaveLoad.instance.tournamentHost)
         {
             canWin = false;
 
+            //Turn off all buttons
             for (int i = 0; i < buttons.Count; i++)
             {
                 buttons[i].interactable = false;
             }
 
+            //Save other players info in SaveLoad to calculate score after match
             SaveLoad.instance.otherPlayerRP = otherPlayerRP;
             SaveLoad.instance.otherPlayerName = StatsManager.instance.theirName.text;
             SaveLoad.instance.onlineMatch = true;
@@ -429,6 +529,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             yield return new WaitForSeconds(0.5f);
 
+            //Have local player face front
             if (playerControl.animator != null && playerControl != null)
             {
                 playerControl.AnimBoolFalse();
@@ -438,6 +539,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             yield return new WaitForSeconds(0.5f);
 
+            //Play death animation for local player
             if (playerControl.animator != null && playerControl != null)
             {
                 playerControl.AnimBoolFalse();
@@ -446,13 +548,17 @@ public class GameManager : MonoBehaviourPunCallbacks
                 playerControl.canMove = false;
             }
 
+
             DisplayMessage("You have been defeated!");
             yield return new WaitForSeconds(5);
-            PhotonNetwork.LeaveRoom();
-            GetComponent<SceneSelect>().LoseScreen();
+            PhotonNetwork.LeaveRoom(); //Leave networked match
+            GetComponent<SceneSelect>().LoseScreen(); //Go to lose screen 
         }
     }
 
+    /// <summary>
+    /// Receives a message to start WinRoutine for local player
+    /// </summary>
     [PunRPC]
     public void RPC_WinRoutine()
     {
@@ -460,12 +566,16 @@ public class GameManager : MonoBehaviourPunCallbacks
             StartCoroutine(WinRoutine());
     }
 
+    /// <summary>
+    /// Handles ending the match for local player and calculates a win for them
+    /// </summary>
     public IEnumerator WinRoutine()
     {
         if (!SaveLoad.instance.tournamentHost)
         {
             canWin = false;
 
+            //Turn off all buttons
             for (int i = 0; i < buttons.Count; i++)
             {
                 buttons[i].interactable = false;
@@ -474,11 +584,12 @@ public class GameManager : MonoBehaviourPunCallbacks
             if (StatsManager.instance.myHP < 0)
                 StatsManager.instance.myHP = 0;
 
+            //Save other players info in SaveLoad to calculate score after match
             SaveLoad.instance.otherPlayerRP = otherPlayerRP;
             SaveLoad.instance.otherPlayerName = StatsManager.instance.theirName.text;
             SaveLoad.instance.onlineMatch = true;
 
-            playerControl.canMove = false;
+            playerControl.canMove = false; //Prevent player from moving
 
             yield return new WaitForSeconds(1);
 
@@ -486,6 +597,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             yield return new WaitForSeconds(0.5f);
 
+            //Make player face forward
             if (playerControl.animator != null && playerControl != null)
             {
                 playerControl.AnimBoolFalse();
@@ -495,6 +607,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             yield return new WaitForSeconds(0.5f);
 
+            //Play win animation on local player
             if (playerControl.animator != null && playerControl != null)
             {
                 playerControl.AnimBoolFalse();
@@ -504,27 +617,35 @@ public class GameManager : MonoBehaviourPunCallbacks
 
             yield return new WaitForSeconds(3f);
 
-            PhotonNetwork.LeaveRoom();
-            GetComponent<SceneSelect>().WinScreen();
+            PhotonNetwork.LeaveRoom(); //Leave networked match
+            GetComponent<SceneSelect>().WinScreen(); //Go to win screen
         }
     }
 
+    /// <summary>
+    /// Checks if the other player is still in the game
+    /// </summary>
     void CheckOtherPlayerDrop()
     {
         if (theirPlayer == null)
         {
             if (gameStarted)
             {
+                //If the other player leaves part way then start WinRoutine
                 StartCoroutine(WinRoutine());
                 DisplayMessage("The opponent has left the match.");
             }
             else
             {
+                //If the other player didn't show up at all leave to mein menu
                 StartCoroutine(NoOpponentRoutine());
             }
         }
     }
 
+    /// <summary>
+    /// If the opponent dropped before the match starts this function sends local player back to main menu
+    /// </summary>
     IEnumerator NoOpponentRoutine()
     {
         DisplayMessage("Opponent dropped before the match started \n\nRetruning to main menu");
@@ -532,6 +653,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         SceneSelect.instance.MainMenuButton();
     }
 
+
+    /// <summary>
+    /// Runs if local player exits the app before the end of the match - records a loss for local player and a win for opponent(s)
+    /// </summary>
     public void OnApplicationQuit()
     {
         if (!SaveLoad.instance.tournamentHost)

@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
+/// <summary>
+/// Script for behaviour of health bar and exp bar
+/// </summary>
 public class BarScript : MonoBehaviour
 {
     [HideInInspector]
@@ -25,6 +28,10 @@ public class BarScript : MonoBehaviour
 
     public float MaxValue;
 
+    /// <summary>
+    /// Sets the value of the bar
+    /// </summary>
+    /// <param name="value"></param>
     public void SetValue(float value)
     {
         string temp = valueText.text;
@@ -38,6 +45,9 @@ public class BarScript : MonoBehaviour
 		HandleBar();
     }
 
+    /// <summary>
+    /// Used to trigger the fill of the bar
+    /// </summary>
     private void HandleBar()
 	{
         if (fillAmount != fill.fillAmount)
@@ -46,6 +56,9 @@ public class BarScript : MonoBehaviour
         }
 	}
 
+    /// <summary>
+    /// Changes bar color depending what percent it is filled
+    /// </summary>
     private void CheckColor()
     {
         if (fillAmount >= 0.6)
@@ -56,6 +69,11 @@ public class BarScript : MonoBehaviour
             fill.color = lowColor;
     }
 
+    /// <summary>
+    /// Returns the fill amount by dividing value by inMax
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="inMax"></param>
     public float Map(float value, float inMax)
     {
         return value / inMax;

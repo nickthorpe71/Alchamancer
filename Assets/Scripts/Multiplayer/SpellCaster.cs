@@ -5,6 +5,9 @@ using UnityEngine.UI;
 using Photon.Pun;
 using Photon.Realtime;
 
+/// <summary>
+/// Multiplayer Version - Handles calculating damage, effects and animations for all spells
+/// </summary>
 public class SpellCaster : MonoBehaviourPunCallbacks
 {
     [Header("Management")]
@@ -17,8 +20,8 @@ public class SpellCaster : MonoBehaviourPunCallbacks
     private PlayerControl theirPlayerControl;
 
     [Header("UI")]
-    public GameObject noSpells;
-    public bool sorted;
+    public GameObject noSpells; //Message to state that there are no spells available
+    public bool sorted; //Bool indicating whether spells have been sorted
 
     [Header("Projectiles")]
     private Vector3 projectileStart;
@@ -28,15 +31,14 @@ public class SpellCaster : MonoBehaviourPunCallbacks
     private Vector3 targetPos;
 
     [Header("Spells")]
-    private Dictionary<float, string> potencyDict = new Dictionary<float, string>();
-    public SpellListSO spellLibrary;
-    public SpellSO[] spellsStandard;
-    public SpellListing spellListing;
-    public Transform content;
-    public List<GameObject> spellButtons = new List<GameObject>();
-    public List<GameObject> animations = new List<GameObject>();
-    public Dictionary<string, GameObject> animationDict = new Dictionary<string, GameObject>();
-    public Dictionary<string, string> oppositeDict = new Dictionary<string, string>();
+    public SpellListSO spellLibrary; //Scriptable object holding all spell scriptable objects
+    public SpellSO[] spellsStandard; //Array of standard spell list
+    public SpellListing spellListing; //Prefab for a spell listing button
+    public Transform content; //Area where spell listings will be displayed
+    public List<GameObject> spellButtons = new List<GameObject>(); //List of all spell listing buttons
+    public List<GameObject> animations = new List<GameObject>(); //List of all spell animations
+    public Dictionary<string, GameObject> animationDict = new Dictionary<string, GameObject>(); //Dictionary where the key is the animation name and value is the corrisponding animation
+    public Dictionary<string, string> oppositeDict = new Dictionary<string, string>(); //Dictionary for specifying each element's opposite
     public bool mirror;
 
     private void Start()
@@ -49,7 +51,7 @@ public class SpellCaster : MonoBehaviourPunCallbacks
 
         if (!SaveLoad.instance.tournamentHost)
         {
-            Invoke("DelayedStart", 8);
+            Invoke("DelayedStart", 8); //Assign scrpts that may be generated a few seconds after atart of match
 
             statsManager = StatsManager.instance;
 
@@ -60,6 +62,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Sets up opposite dictionary 
+    /// </summary>
     void PopulateOppositeDict()
     {
         oppositeDict.Add("Blue", "Red");
@@ -70,6 +75,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         oppositeDict.Add("Black", "White");
     }
 
+    /// <summary>
+    /// Runs scripts a few seconds after game starts
+    /// </summary>
     void DelayedStart()
     {
         terraScript = gameManager.myPlayer.GetComponent<Terraform>();
@@ -77,6 +85,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         theirPlayerControl = gameManager.theirPlayer.GetComponent<PlayerControl>();
     }
 
+    /// <summary>
+    /// Sorts spells into a list of all spells
+    /// </summary>
     public void SortButtonAll()
     {
         ClearSpellButtons();
@@ -84,12 +95,19 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         sorted = false;
     }
 
+    /// <summary>
+    /// Sorts spells into a list of only what we currently have enough mana for
+    /// </summary>
     public void SortButtonSorted()
     {
         SortSpells();
         sorted = true;
     }
 
+    /// <summary>
+    /// Populates UI display of spell buttons using spell listings and lsit of spell scriptable objects
+    /// </summary>
+    /// <param name="spells"></param>
     private void PopulateSpellList(SpellSO[] spells)
     {
         if (spells.Length > 0)
@@ -114,6 +132,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         CheckCosts();
     }
 
+    /// <summary>
+    /// Clears all spell buttons from UI display
+    /// </summary>
     private void ClearSpellButtons()
     {
         for (int i = 0; i < spellButtons.Count; i++)
@@ -124,6 +145,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         spellButtons.Clear();
     }
 
+    /// <summary>
+    /// Function called by sort button on UI display
+    /// </summary>
     private void SortSpells()
     {
         ClearSpellButtons();
@@ -149,7 +173,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         PopulateSpellList(spellsSorted);
     }
 
-
+    /// <summary>
+    /// Sets up animation dictionary using animations list
+    /// </summary>
     private void PopulateAnimationDictionary()
     {
         foreach (GameObject anim in animations)
@@ -158,6 +184,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Runs the CheckCost function on each spell listing to make that spell button interactable if we have enough mana or not interactable if we don't
+    /// </summary>
     public void CheckCosts()
     {
         foreach (GameObject button in spellButtons)
@@ -166,12 +195,17 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Main function for submitting a spell to be played and runs all appropriate damage and effect calculationas as well as triggers animations - Takes the power of the spell and the spell scriptable object
+    /// </summary>
+    /// <param name="power"></param>
+    /// <param name="spell"></param>
     public void SubmitAttack(int power, SpellSO spell)
     {
         int attack = statsManager.myAttack;
         int defense = statsManager.theirDefense;
 
-        if (spell.counter)
+        if (spell.counter) //Check if the spell that was cast is a counter
         {
             if (!statsManager.myCounter)
             {
@@ -192,7 +226,7 @@ public class SpellCaster : MonoBehaviourPunCallbacks
                 gameManager.DisplayMessage("You are already prepared to counter");
             }
         }
-        else
+        else //Otherwise it is not a counter spell
         {
             soundManager.PlaySinglePublic(spell.spellName, 1);
 
@@ -200,6 +234,8 @@ public class SpellCaster : MonoBehaviourPunCallbacks
 
             gameManager.DisplayPublicMessage(gameManager.playerControl.screenName + " used " + spell.spellName);
 
+
+            //Determine environment modifier
             if (spell.color == AreaColorManager.instance.currentAreaColor)
             {
                 environment = 2;
@@ -218,14 +254,16 @@ public class SpellCaster : MonoBehaviourPunCallbacks
             }
             else environment = 1;
 
+            //Main damage formula
             float modifier = environment;
-            float damagePreRounding = ((22 * power * attack / defense / 50)) * modifier;
+            float damagePreRounding = ((22 * power * attack / defense / 50)) * modifier; 
 
             if (spell.category == "Attack")
                 damagePreRounding++;
 
             int damage = Mathf.RoundToInt(damagePreRounding);
 
+            //Check if the spell is a mana consumption spell
             if (spell.eatMana)
             {
                 if (terraScript.target.tag != "Dirt" && terraScript.target != null)
@@ -258,10 +296,15 @@ public class SpellCaster : MonoBehaviourPunCallbacks
 
         if (sorted)
             SortButtonSorted();
-        CheckCosts();
+        CheckCosts(); //Check which spells we can afford after casting the last spell
 
     }
 
+    /// <summary>
+    /// Run for each spell cast to trigger any effects outside of dealing damage
+    /// </summary>
+    /// <param name="spell"></param>
+    /// <param name="modifier"></param>
     private void FactorEffects(SpellSO spell, float modifier)
     {
         //Screen Shake
@@ -322,6 +365,11 @@ public class SpellCaster : MonoBehaviourPunCallbacks
             statsManager.TheirStat("Defense", Mathf.RoundToInt(spell.theirDefInt * modifier));
     }
 
+    /// <summary>
+    /// After damage amount is calculated this routine triggers animations and lowers health of damaged opponent on screen - Player feedback portion of spell casting
+    /// </summary>
+    /// <param name="damage"></param>
+    /// <param name="spell"></param>
     public IEnumerator DamageRoutine(int damage, SpellSO spell)
     {
         yield return new WaitForSeconds(0.3f);
@@ -354,6 +402,11 @@ public class SpellCaster : MonoBehaviourPunCallbacks
             statsManager.MyHealth(damage, false);
     }
 
+    /// <summary>
+    /// Takes in a spell and subtracts the appropriate amount of mana for that spells cost
+    /// </summary>
+    /// <param name="spell"></param>
+    /// <param name="AI"></param>
     private void PayMana(SpellSO spell)
     {
         terraScript.waterCount -= spell.blueCost;
@@ -368,6 +421,14 @@ public class SpellCaster : MonoBehaviourPunCallbacks
 
     }
 
+    /// <summary>
+    /// Rolls to see if the spell successfully poisoned or butned the player
+    /// </summary>
+    /// <param name="chance"></param>
+    /// <param name="type"></param>
+    /// <param name="hitMe"></param>
+    /// <param name="spell"></param>
+    /// <returns></returns>
     private IEnumerator CheckDot(int chance, string type, bool hitMe, SpellSO spell)
     {
         yield return new WaitForSeconds(1);
@@ -412,6 +473,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Run whenever a counter is triggered
+    /// </summary>
+    /// <param name="AI"></param>
     public void Counter()
     {
         if (!mirror)
@@ -433,6 +498,9 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Receives a message that the opponent has just cast counter
+    /// </summary>
     [PunRPC]
     public void RPC_Counter()
     {
@@ -440,7 +508,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
             statsManager.theirCounter = true;
     }
 
-
+    /// <summary>
+    /// receives a message that a player (specified by name) has just used antidote
+    /// </summary>
+    /// <param name="name"></param>
     [PunRPC]
     private void RPC_Antidote(string name)
     {
@@ -455,6 +526,11 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Receives a message that a player (specified by name) has been poisoned
+    /// </summary>
+    /// <param name="hitMe"></param>
+    /// <param name="name"></param>
     [PunRPC]
     private void RPC_Poison(bool hitMe, string name)
     {
@@ -476,6 +552,11 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Receives a message that a player (specified by name) has been burned
+    /// </summary>
+    /// <param name="hitMe"></param>
+    /// <param name="name"></param>
     [PunRPC]
     private void RPC_Burn(bool hitMe, string name)
     {
@@ -496,7 +577,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
             }
         }
     }
-
+    /// <summary>
+    /// Sets appropriate start and end positions for the projectile and sends message mimic this projectile on opponents screen
+    /// </summary>
+    /// <param name="_projectile"></param>
     public void LaunchProjectile(string _projectile)
     {
         if (_projectile == "Reap" || _projectile == "HarvestSoul")
@@ -516,7 +600,13 @@ public class SpellCaster : MonoBehaviourPunCallbacks
     }
 
 
-
+    /// <summary>
+    /// Launches a _projectile prefab starting at specified start location that ends at specified end location
+    /// </summary>
+    /// <param name="_projectileStart"></param>
+    /// <param name="_projectileEnd"></param>
+    /// <param name="_projectile"></param>
+    /// <returns></returns>
     public IEnumerator Projectile(Vector3 _projectileStart, Vector3 _projectileEnd, string _projectile)
     {
         myPlayerControl.canMove = false;
@@ -532,6 +622,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         TournamentHost.instance.SubmitAttackProjectile(_projectileStart, _projectileEnd, _projectile);
     }
 
+    /// <summary>
+    /// Receives a message to leaunch a projectile form opponents player object to my player object
+    /// </summary>
+    /// <param name="_projectile"></param>
     [PunRPC]
     public void RPC_ThemToMe(string _projectile)
     {
@@ -543,6 +637,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Plays spell effect animation (specified by effect string) at opponents location - sends a message to mimic this on opponents screen
+    /// </summary>
+    /// <param name="effect"></param>
     public void TheirLocationEffect(string effect)
     {
         targetPos = gameManager.theirPlayer.transform.position;
@@ -552,6 +650,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         base.photonView.RPC("RPC_TheirLocationEffect", RpcTarget.Others, effect);
     }
 
+    /// <summary>
+    /// Receives a message to play specified animation at local players location
+    /// </summary>
+    /// <param name="effect"></param>
     [PunRPC]
     public void RPC_TheirLocationEffect(string effect)
     {
@@ -563,6 +665,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Plays spell effect animation (specified by effect string) at local players location - sends a message to mimic this on opponents screen
+    /// </summary>
+    /// <param name="effect"></param>
     public void MyLocationEffect(string effect)
     {
         targetPos = gameManager.myPlayer.transform.position;
@@ -572,6 +678,10 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         base.photonView.RPC("RPC_MyLocationEffect", RpcTarget.Others, effect);
     }
 
+    /// <summary>
+    /// Receives a message to play specified animation at opponents location
+    /// </summary>
+    /// <param name="effect"></param>
     [PunRPC]
     public void RPC_MyLocationEffect(string effect)
     {
@@ -583,6 +693,11 @@ public class SpellCaster : MonoBehaviourPunCallbacks
         }
     }
 
+    /// <summary>
+    /// Plays an animation in at a target location
+    /// </summary>
+    /// <param name="effect"></param>
+    /// <returns></returns>
     public IEnumerator StationaryEffect(string effect)
     {
         myPlayerControl.canMove = false;

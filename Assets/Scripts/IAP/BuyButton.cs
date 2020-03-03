@@ -3,8 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Script to be put on donation buttons
+/// </summary>
 public class BuyButton : MonoBehaviour
 {
+    /// <summary>
+    /// Determines the value of donation that this button is set to
+    /// </summary>
     public enum ItemType
     {
         Donate1,
@@ -24,6 +30,9 @@ public class BuyButton : MonoBehaviour
         StartCoroutine(LookAtPriceRoutine());
     }
 
+    /// <summary>
+    /// The function called when someone clicks one of the donate buttons
+    /// </summary>
     public void ClickBuy()
     {
         switch (itemType)
@@ -43,6 +52,9 @@ public class BuyButton : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Checks the price in the store in the app store on use users device and pulls down the price in the correct currency
+    /// </summary>
     private IEnumerator LookAtPriceRoutine()
     {
         while (!Purchaser.instance.IsInitialized())
