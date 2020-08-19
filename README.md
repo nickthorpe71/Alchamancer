@@ -1,5 +1,3 @@
-# Alchamancer
-
 ![Project Image](https://lostonestudios.com/images/logo.png)
 
 > An online PvP mobile game designed to have short sessions while retaining strategic depth
