@@ -6,9 +6,9 @@
 
 ### Table of Contents
 
-- [Description] {#description}
-- [How to Use] {#how-to-use}
-- [Author Info] {#author-info}
+- Description
+- How to Use
+- Author Info
 
 ---
 
@@ -26,8 +26,7 @@ Alchamancer is a turn based PvP game where you strategically collect mana to cas
 
 ## Author Info
 
+- LinkedIn - https://www.linkedin.com/in/nick-thorpe-dev/
 - Twitter - https://twitter.com/lostonestudios?lang=en
 - Instagram - https://saveig.org/lostonestudios/
 - Website - https://lostonestudios.com/alchamancer/about
-
-[Back to The Top] {#alchamancer}
