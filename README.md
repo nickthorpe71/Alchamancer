@@ -29,4 +29,4 @@ Alchamancer is a turn based PvP game where you strategically collect mana to cas
 - LinkedIn - https://www.linkedin.com/in/nick-thorpe-dev/
 - Twitter - https://twitter.com/lostonestudios?lang=en
 - Instagram - https://saveig.org/lostonestudios/
-- Website - https://lostonestudios.com/alchamancer/about
+- Website - https://nick_lostonestudios.com/alchamancer/about
